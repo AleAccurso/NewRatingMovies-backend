@@ -37,9 +37,32 @@ router.get("/:id", (req, res) => {
 
 //Add a movie
 router.post("/", (req, res) => {
-  const movie = new movieModel({
+  let movie = new movieModel({
     ...req.body,
   });
+
+  //Make a string of all genres
+  let strGenres = "";
+  movie["genres"].forEach((genre) => {
+    strGenres += genre.name + ", ";
+  });
+  strGenres = strGenres.slice(0, -2);
+
+  //Make an string of the 3 first actors
+  let actors = [];
+
+  if (movie["credits"]["cast"]) {
+    if (movie["credits"]["cast"][0]) {
+      actors += fullMovieData["credits"]["cast"][0]["name"];
+    }
+    if (movie["credits"]["cast"][1]) {
+      actors += " - " + fullMovieData["credits"]["cast"][1]["name"];
+    }
+    if (movie["credits"]["cast"][2]) {
+      actors += " - " + movie["credits"]["cast"][2]["name"];
+    }
+  }
+
   movie
     .save()
     .then(() => res.status(201).json({ message: "Movie register sucessfull" }))
@@ -81,7 +104,7 @@ router.post("/search/:title", (req, res) => {
     process.env.API_TOKEN +
     "&query=" +
     req.params.title.replace(" ", "+") +
-    "&language=fr";
+    "&append_to_response=credits&language=fr";
 
   axios
     .get(url)
