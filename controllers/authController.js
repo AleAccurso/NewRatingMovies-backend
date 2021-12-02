@@ -44,7 +44,7 @@ exports.postLogin = async (req, res, next) => {
     const user = await userModel.findOne({ email: email });
 
     if (!user) {
-      const error = new Error("user with this email not found!");
+      const error = new Error("User with this email not found!");
       error.statusCode = 401;
       throw error;
     }
@@ -53,7 +53,7 @@ exports.postLogin = async (req, res, next) => {
     const comparePassword = bcrypt.compare(password, user.password);
 
     if (!comparePassword) {
-      const error = new Error("password is not match!");
+      const error = new Error("Password does not match!");
       error.statusCode = 401;
       throw error;
     }
@@ -70,12 +70,19 @@ exports.postLogin = async (req, res, next) => {
 };
 
 exports.getUser = (req, res, next) => {
-  res.status(200).json({
-    user: {
-      id: loadedUser._id,
-      name: loadedUser.name,
-      email: loadedUser.email,
-      isAdmin: loadedUser.isAdmin,
-    },
-  });
+  if (loadedUser) {
+    res.status(200).json({
+      user: {
+        id: loadedUser._id,
+        name: loadedUser.name,
+        email: loadedUser.email,
+        isAdmin: loadedUser.isAdmin,
+      },
+    });
+  } else {
+    res.status(200).json({
+      user: {},
+      message: "No user Logged.",
+    });
+  }
 };
