@@ -65,7 +65,7 @@ router.post("/", (req, res) => {
     }
   }
 
-  movie["actors"] = actors;
+  movie["casting"] = actors;
 
   movie
     .save()
