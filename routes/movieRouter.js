@@ -48,6 +48,8 @@ router.post("/", (req, res) => {
   });
   strGenres = strGenres.slice(0, -2);
 
+  movie["strGenres"] = strGenres;
+
   //Make an string of the 3 first actors
   let actors = [];
 
@@ -62,6 +64,8 @@ router.post("/", (req, res) => {
       actors += " - " + movie["credits"]["cast"][2]["name"];
     }
   }
+
+  movie["actors"] = actors;
 
   movie
     .save()
