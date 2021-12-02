@@ -41,32 +41,6 @@ router.post("/", (req, res) => {
     ...req.body,
   });
 
-  //Make a string of all genres
-  let strGenres = "";
-  movie["genres"].forEach((genre) => {
-    strGenres += genre.name + ", ";
-  });
-  strGenres = strGenres.slice(0, -2);
-
-  movie["strGenres"] = strGenres;
-
-  //Make an string of the 3 first actors
-  let actors = [];
-
-  if (movie["credits"]["cast"]) {
-    if (movie["credits"]["cast"][0]) {
-      actors += fullMovieData["credits"]["cast"][0]["name"];
-    }
-    if (movie["credits"]["cast"][1]) {
-      actors += " - " + fullMovieData["credits"]["cast"][1]["name"];
-    }
-    if (movie["credits"]["cast"][2]) {
-      actors += " - " + movie["credits"]["cast"][2]["name"];
-    }
-  }
-
-  movie["casting"] = actors;
-
   movie
     .save()
     .then(() => res.status(201).json({ message: "Movie register sucessfull" }))
@@ -108,7 +82,7 @@ router.post("/search/:title", (req, res) => {
     process.env.API_TOKEN +
     "&query=" +
     req.params.title.replace(" ", "+") +
-    "&append_to_response=credits&language=fr";
+    "&language=fr";
 
   axios
     .get(url)
@@ -133,7 +107,9 @@ router.post("/:id/getInfo", (req, res) => {
     )
     .then((response) => {
       let fullMovieData = response.data;
-      let director;
+
+      //gets the director's name
+      let director = null;
 
       Object.entries(fullMovieData.credits.crew).forEach((crew) => {
         if (crew[1].job == "Director") {
@@ -163,19 +139,23 @@ router.post("/:id/getInfo", (req, res) => {
         }
       }
 
+      if (actors.count === 0) {
+        actors = null;
+      }
+
       let infoToReturn = {
         movieDbId: fullMovieData["id"],
-        originalTitle: fullMovieData["original_title"],
         title: fullMovieData["title"],
-        genres: fullMovieData["genres"],
         strGenres: strGenres,
         vote_average: fullMovieData["vote_average"],
+        vote_count: fullMovieData["vote_count"],
         release_date: fullMovieData["release_date"],
         poster_path: fullMovieData["poster_path"],
         director: director,
         overview: fullMovieData["overview"],
         casting: actors,
       };
+      console.log(infoToReturn);
       res.status(200).json(infoToReturn);
     })
     .catch((error) => {
