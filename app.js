@@ -33,9 +33,10 @@ app.use("/api/users", userRouter);
 app.get("api/users", (req, res) => {}); // Get all users
 
 app
-  .get("api/users/:id", (req, res) => {}) // Get infor about a user
-  .post("api/users/:id", (req, res) => {}) // Update a user
-  .delete("api/users/:id", (req, res) => {}); //Delete a user
+  .route("api/users/:id")
+  .get((req, res) => {}) // Get info about a user -->not working
+  .patch((req, res) => {}) // Update a user
+  .delete((req, res) => {}); //Delete a user
 
 //<---------></--------->
 //Movies
@@ -43,9 +44,10 @@ app
 app.get("api/movies", (req, res) => {}); //Get all movies
 
 app
-  .get("api/movies/:id", (req, res) => {}) //Get a specific movie by movieDbId
-  .post("api/movies/:id", (req, res) => {}) //Add a movie
-  .delete("api/movies/:id", (req, res) => {}); //Delete movie
+  .route("api/movies/:id")
+  .get((req, res) => {}) //Get a specific movie by movieDbId
+  .post((req, res) => {}) //Add a movie
+  .delete((req, res) => {}); //Delete movie
 
 // API - theMovieDB
 app.post("api/movies/search/:title", (req, res) => {}); // Get a search result

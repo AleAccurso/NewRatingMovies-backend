@@ -26,8 +26,7 @@ router.get("/:id", (req, res) => {
 });
 
 //update a user
-router.post("/:id", (req, res) => {
-  // let id = req.params.id;
+router.patch("/:id", (req, res) => {
   userModel.findOneAndUpdate(
     { _id: req.params.id },
     {
