@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const express = require("express");
 const router = express.Router();
-
 const movieModel = require("../models/movieModel");
 const axios = require("axios");
 const { exec } = require("child_process");
@@ -20,7 +19,7 @@ router.get("/", (req, res) => {
   });
 });
 
-//Get a specific movie by id
+//Get a specific movie by movieDbId
 router.get("/:id", (req, res) => {
   const movies = movieModel.findOne(
     { movieDbId: req.params.id },
@@ -64,7 +63,7 @@ router.patch("/:id", (req, res) => {
 });
 
 //Delete movie from DB
-router.route("/delete/:id").delete((req, res) => {
+router.route("/:id").delete((req, res) => {
   movieModel.deleteOne({ id: req.params.id }, (err) => {
     if (err) {
       res.status(500).send("Error");

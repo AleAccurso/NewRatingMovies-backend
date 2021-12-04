@@ -26,35 +26,33 @@ app.use((req, res, next) => {
 
 app.use("/api/auth/", authRouter);
 app.use("/api/movies", movieRouter);
-app.use("/api", userRouter);
+app.use("/api/users", userRouter);
 
 //<---------></--------->
 //user
-app.route("api/users").get((req, res) => {});
+app.get("api/users", (req, res) => {}); // Get all users
 
-app.route("api/user/:userId").get((req, res) => {});
-
-app.route("api/user/update/:userId").patch((req, res) => {});
-
-app.route("api/user/delete/:userId").delete((req, res) => {});
+app
+  .get("api/users/:id", (req, res) => {}) // Get infor about a user
+  .post("api/users/:id", (req, res) => {}) // Update a user
+  .delete("api/users/:id", (req, res) => {}); //Delete a user
 
 //<---------></--------->
 //Movies
 
-app
-  .route("api/movies")
-  .get((req, res) => {})
-  .post((req, res) => {});
+app.get("api/movies", (req, res) => {}); //Get all movies
 
 app
-  .route("api/movies/:id")
-  .get((req, res) => {})
-  .patch((req, res) => {});
+  .get("api/movies/:id", (req, res) => {}) //Get a specific movie by movieDbId
+  .post("api/movies/:id", (req, res) => {}) //Add a movie
+  .delete("api/movies/:id", (req, res) => {}); //Delete movie
 
-app.route("api/movies/search/:title").post((req, res) => {});
-app.route("api/movies/:id/getInfo").post((req, res) => {});
+// API - theMovieDB
+app.post("api/movies/search/:title", (req, res) => {}); // Get a search result
+app.post("api/movies/:id/getInfo", (req, res) => {}); // Get information about a movie from API
 
-app.route("api/movies/delete/:id").delete((req, res) => {});
+//Local
+app.post("api/movies/:id/metadata", (req, res) => {}); //Change metadata a MKV file on the hard drive
 
 //
 app.use((error, req, res, next) => {

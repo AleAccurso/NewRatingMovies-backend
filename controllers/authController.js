@@ -3,7 +3,7 @@ const userModel = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 
 exports.postSignin = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, language } = req.body;
   try {
     const existUser = await userModel.findOne({ email: email });
     if (existUser) {
@@ -22,6 +22,7 @@ exports.postSignin = async (req, res, next) => {
       name: name,
       email: email,
       password: hashedPassword,
+      language: language,
     });
     const result = await user.save();
     res.status(200).json({
@@ -77,6 +78,8 @@ exports.getUser = (req, res, next) => {
         name: loadedUser.name,
         email: loadedUser.email,
         isAdmin: loadedUser.isAdmin,
+        favorites: loadedUser.favorites,
+        language: loadedUser.language,
       },
     });
   } else {

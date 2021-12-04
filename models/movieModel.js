@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
-
 const Schema = mongoose.Schema;
 
 const MovieSchema = new Schema({
-  movieDbId: { type: Number, required: true, unique: true },
+  movieDbId: { type: String, required: true, unique: true },
   title: { type: String, required: true },
   release_date: { type: String, required: true },
   strGenres: { type: String, required: true },
@@ -13,6 +12,7 @@ const MovieSchema = new Schema({
   poster_path: { type: String, required: true },
   vote_average: { type: Number, required: true },
   vote_count: { type: Number, required: true },
+  language: { type: String, required: true },
 });
 
 module.exports = mongoose.model("Movie", MovieSchema);
