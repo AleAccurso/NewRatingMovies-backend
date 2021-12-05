@@ -19,7 +19,7 @@ exports.postSignin = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new userModel({
-      name: name,
+      nickname: name,
       email: email,
       password: hashedPassword,
       language: language,
@@ -61,7 +61,7 @@ exports.postLogin = async (req, res, next) => {
     const token = jwt.sign({ email: loadedUser.email }, "expressnuxtsecret", {
       expiresIn: "3600s",
     });
-    res.status(200).json({ token: token });
+    res.status(200).json({ token: token, language: loadedUser.language });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -75,7 +75,7 @@ exports.getUser = (req, res, next) => {
     res.status(200).json({
       user: {
         id: loadedUser._id,
-        name: loadedUser.name,
+        nickname: loadedUser.nickname,
         email: loadedUser.email,
         isAdmin: loadedUser.isAdmin,
         favorites: loadedUser.favorites,
