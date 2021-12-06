@@ -143,6 +143,7 @@ router.post("/:id/getInfo", (req, res) => {
         actors = null;
       }
 
+      //Build object to return
       let infoToReturn = {
         movieDbId: fullMovieData["id"],
         title: fullMovieData["title"],
