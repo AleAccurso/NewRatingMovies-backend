@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const moment = require("moment");
 const router = express.Router();
 const movieModel = require("../models/movieModel");
 const axios = require("axios");
@@ -19,6 +20,17 @@ router.get("/", (req, res) => {
   });
 });
 
+//Add a movie
+router.post("/", (req, res) => {
+  let movie = new movieModel({
+    ...req.body,
+  });
+  movie
+    .save()
+    .then(() => res.status(201).json({ message: "Movie register sucessfull" }))
+    .catch((error) => res.status(400).json({ error }));
+});
+
 //Get a specific movie by movieDbId
 router.get("/:id", (req, res) => {
   const movies = movieModel.findOne(
@@ -32,18 +44,6 @@ router.get("/:id", (req, res) => {
       }
     }
   );
-});
-
-//Add a movie
-router.post("/", (req, res) => {
-  let movie = new movieModel({
-    ...req.body,
-  });
-
-  movie
-    .save()
-    .then(() => res.status(201).json({ message: "Movie register sucessfull" }))
-    .catch((error) => res.status(400).json({ error }));
 });
 
 //Update a movie
@@ -93,7 +93,9 @@ router.post("/search/:title", (req, res) => {
     });
 });
 
-//Get the information about a movie from api
+// Get the information about a movie from api
+// Here, the id is actually the id of the movie in the API
+// movieDbId in our DB
 router.post("/:id/getInfo", (req, res) => {
   axios
     .get(
@@ -148,11 +150,12 @@ router.post("/:id/getInfo", (req, res) => {
         strGenres: strGenres,
         vote_average: fullMovieData["vote_average"],
         vote_count: fullMovieData["vote_count"],
-        release_date: fullMovieData["release_date"],
+        release_date: moment(fullMovieData["release_date"]).format("LL"),
         poster_path: fullMovieData["poster_path"],
         director: director,
         overview: fullMovieData["overview"],
         casting: actors,
+        language: "fr",
       };
       console.log(infoToReturn);
       res.status(200).json(infoToReturn);
@@ -193,7 +196,7 @@ router.post("/:id/metadata", (req, res) => {
       }
     );
   } else {
-    console.log("Not a MKV movie");
+    res.status(200).json("Not a MKV movie");
   }
 });
 

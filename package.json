@@ -17,14 +17,15 @@
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
+    "moment": "^2.29.1",
     "mongoose": "^6.0.5",
     "morgan": "^1.10.0",
     "multer": "^1.4.3",
-    "request": "^2.88.2",
-    "dotenv": "^10.0.0",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "request": "^2.88.2"
   }
 }

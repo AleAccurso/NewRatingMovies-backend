@@ -41,12 +41,14 @@ app
 //<---------></--------->
 //Movies
 
-app.get("api/movies", (req, res) => {}); //Get all movies
+app
+  .route("api/movies")
+  .get((req, res) => {}) //Get all movies
+  .post((req, res) => {}); //Add a movie
 
 app
   .route("api/movies/:id")
   .get((req, res) => {}) //Get a specific movie by movieDbId
-  .post((req, res) => {}) //Add a movie
   .delete((req, res) => {}); //Delete movie
 
 // API - theMovieDB
