@@ -73,14 +73,15 @@ router.route("/:id").delete((req, res) => {
 });
 
 //Get search result from api
-router.post("/search/:title", (req, res) => {
+router.post("/search/:title/:language", (req, res) => {
   let url =
     process.env.API_URL +
     "/search/movie?api_key=" +
     process.env.API_TOKEN +
     "&query=" +
     req.params.title.replace(" ", "+") +
-    "&language=fr";
+    "&language=" +
+    req.params.language;
 
   axios
     .get(url)
