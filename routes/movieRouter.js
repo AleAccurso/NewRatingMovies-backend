@@ -1,7 +1,6 @@
 require("dotenv").config();
 
 const express = require("express");
-const moment = require("moment");
 const router = express.Router();
 const movieModel = require("../models/movieModel");
 const axios = require("axios");
@@ -150,14 +149,14 @@ router.post("/:id/getInfo", (req, res) => {
         strGenres: strGenres,
         vote_average: fullMovieData["vote_average"],
         vote_count: fullMovieData["vote_count"],
-        release_date: moment(fullMovieData["release_date"]).format("LL"),
+        release_date: fullMovieData["release_date"],
         poster_path: fullMovieData["poster_path"],
         director: director,
         overview: fullMovieData["overview"],
         casting: actors,
         language: "fr",
       };
-      console.log(infoToReturn);
+
       res.status(200).json(infoToReturn);
     })
     .catch((error) => {
