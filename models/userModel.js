@@ -10,7 +10,8 @@ const UserSchema = new Schema(
     favorites: { type: Array, default: [] },
     language: { type: String, required: true, default: "fr" },
   },
-  { timestamps: true }
+  { timestamps: true },
+  { versionKey: false }
 );
 
 module.exports = mongoose.model("User", UserSchema);

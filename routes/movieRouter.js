@@ -96,15 +96,17 @@ router.post("/search/:title/:language", (req, res) => {
 // Get the information about a movie from api
 // Here, the id is actually the id of the movie in the API
 // movieDbId in our DB
-router.post("/:id/getInfo", (req, res) => {
-  axios
+router.post("/:id/getInfo", async (req, res) => {
+  let infoToReturn;
+
+  await axios
     .get(
       process.env.API_URL +
         "/movie/" +
         req.params.id +
         "?api_key=" +
         process.env.API_TOKEN +
-        "&append_to_response=credits&language=fr"
+        "&append_to_response=credits&language=en"
     )
     .then((response) => {
       let fullMovieData = response.data;
@@ -126,7 +128,7 @@ router.post("/:id/getInfo", (req, res) => {
       strGenres = strGenres.slice(0, -2);
 
       //Make an string of the 3 first actors
-      let actors = [];
+      let actors = "";
 
       if (fullMovieData["credits"]["cast"]) {
         if (fullMovieData["credits"]["cast"][0]) {
@@ -144,26 +146,53 @@ router.post("/:id/getInfo", (req, res) => {
         actors = null;
       }
 
-      //Build object to return
-      let infoToReturn = {
+      //Build bassic object to return
+      infoToReturn = {
         movieDbId: fullMovieData["id"],
-        title: fullMovieData["title"],
         strGenres: strGenres,
         vote_average: fullMovieData["vote_average"],
         vote_count: fullMovieData["vote_count"],
         release_date: fullMovieData["release_date"],
-        poster_path: fullMovieData["poster_path"],
         director: director,
-        overview: fullMovieData["overview"],
         casting: actors,
-        language: "fr",
+        en: {
+          title: fullMovieData["title"],
+          overview: fullMovieData["overview"],
+          poster_path: fullMovieData["poster_path"],
+        },
       };
-
-      res.status(200).json(infoToReturn);
     })
     .catch((error) => {
       console.log(error);
     });
+
+  //Add information of the other languages
+  let otherLangs = ["fr", "nl", "it"];
+
+  for (let index = 0; index < otherLangs.length; index++) {
+    await axios
+      .get(
+        process.env.API_URL +
+          "/movie/" +
+          req.params.id +
+          "?api_key=" +
+          process.env.API_TOKEN +
+          "&language=" +
+          otherLangs[index]
+      )
+      .then((response) => {
+        fullMovieData = response.data;
+        infoToReturn[otherLangs[index]] = {
+          title: fullMovieData["title"],
+          overview: fullMovieData["overview"],
+          poster_path: fullMovieData["poster_path"],
+        };
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  res.status(200).json(infoToReturn);
 });
 
 //Change metadata
