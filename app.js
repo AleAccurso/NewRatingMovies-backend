@@ -52,7 +52,7 @@ app
   .delete((req, res) => {}); //Delete movie
 
 // API - theMovieDB
-app.post("api/movies/search/:title", (req, res) => {}); // Get a search result
+app.post("api/movies/search/:title/:language", (req, res) => {}); // Get a search result
 app.post("api/movies/:id/getInfo", (req, res) => {}); // Get information about a movie from API
 
 //Local
