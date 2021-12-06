@@ -36,7 +36,7 @@ router.patch("/:id", (req, res) => {
       if (err) {
         res.status(500).send("Error");
       } else {
-        res.status(200).json("User Sucessfully updated");
+        res.status(200).json(req.body);
       }
     }
   );
