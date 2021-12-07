@@ -91,10 +91,9 @@ router.post("/search/:title/:language", (req, res) => {
         movie[req.params.language] = {
           title: movie.title,
           poster_path: movie.poster_path,
-          oweerview: movie.overview,
+          overview: movie.overview,
         };
       });
-
       res.status(200).json(results);
     })
     .catch((error) => {
