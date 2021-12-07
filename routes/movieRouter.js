@@ -86,7 +86,16 @@ router.post("/search/:title/:language", (req, res) => {
   axios
     .get(url)
     .then((response) => {
-      res.status(200).json(response.data["results"]);
+      let results = response.data["results"];
+      results.forEach((movie) => {
+        movie[req.params.language] = {
+          title: movie.title,
+          poster_path: movie.poster_path,
+          oweerview: movie.overview,
+        };
+      });
+
+      res.status(200).json(results);
     })
     .catch((error) => {
       console.log(error);
