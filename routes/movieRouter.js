@@ -120,12 +120,11 @@ router.post("/:id/getInfo", async (req, res) => {
         }
       });
 
-      //Make a string of all genres
-      let strGenres = "";
+      //Get all names of genre
+      let genres = [];
       fullMovieData["genres"].forEach((genre) => {
-        strGenres += genre.name + ", ";
+        genres.push(genre.name.replace(" ", "").toLowerCase());
       });
-      strGenres = strGenres.slice(0, -2);
 
       //Make an string of the 3 first actors
       let actors = "";
@@ -149,7 +148,7 @@ router.post("/:id/getInfo", async (req, res) => {
       //Build bassic object to return
       infoToReturn = {
         movieDbId: fullMovieData["id"],
-        strGenres: strGenres,
+        genre: genres,
         vote_average: fullMovieData["vote_average"],
         vote_count: fullMovieData["vote_count"],
         release_date: fullMovieData["release_date"],

@@ -9,7 +9,7 @@ const MovieSchema = new Schema(
     casting: { type: String, required: true },
     vote_average: { type: Number, required: true },
     vote_count: { type: Number, required: true },
-    strGenres: { type: String, required: true },
+    genre: { type: Array, required: true },
     en: {
       title: { type: String, required: true },
       overview: { type: String, required: true },
