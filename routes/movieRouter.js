@@ -93,8 +93,6 @@ router.post("/search/:title/:language", (req, res) => {
         toReturn.push({
           id: data[index].id,
           release_date: data[index].release_date,
-          vote_average: data[index].vote_average,
-          vote_count: data[index].vote_count,
           [req.params.language]: {
             poster_path: data[index].poster_path,
             title: data[index].title,
