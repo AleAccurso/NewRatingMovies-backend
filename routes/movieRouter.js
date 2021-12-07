@@ -87,13 +87,14 @@ router.post("/search/:title/:language", (req, res) => {
     .get(url)
     .then((response) => {
       let results = response.data["results"];
-      results.forEach((movie) => {
-        movie[req.params.language] = {
-          title: movie.title,
-          poster_path: movie.poster_path,
-          overview: movie.overview,
+
+      for (let index = 0; index < results.length; index++) {
+        results[index][req.params.language] = {
+          title: results[index].title,
+          poster_path: results[index].poster_path,
+          overview: results[index].overview,
         };
-      });
+      }
       console.log(results);
       res.status(200).json(results);
     })
