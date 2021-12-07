@@ -82,21 +82,27 @@ router.post("/search/:title/:language", (req, res) => {
     req.params.title.replace(" ", "+") +
     "&language=" +
     req.params.language;
-
+  let toReturn;
   axios
     .get(url)
     .then((response) => {
-      let results = response.data["results"];
+      let data = response.data["results"];
+      let toReturn = [];
 
-      for (let index = 0; index < results.length; index++) {
-        results[index][req.params.language] = {
-          title: results[index].title,
-          poster_path: results[index].poster_path,
-          overview: results[index].overview,
-        };
+      for (let index = 0; index < data.length; index++) {
+        toReturn.push({
+          id: data[index].id,
+          release_date: data[index].release_date,
+          vote_average: data[index].vote_average,
+          vote_count: data[index].vote_count,
+          [req.params.language]: {
+            poster_path: data[index].poster_path,
+            title: data[index].title,
+            overview: data[index].overview,
+          },
+        });
       }
-      console.log(results);
-      res.status(200).json(results);
+      res.status(200).json(toReturn);
     })
     .catch((error) => {
       console.log(error);
