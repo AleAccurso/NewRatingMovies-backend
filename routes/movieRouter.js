@@ -94,6 +94,7 @@ router.post("/search/:title/:language", (req, res) => {
           overview: movie.overview,
         };
       });
+      console.log(results);
       res.status(200).json(results);
     })
     .catch((error) => {
