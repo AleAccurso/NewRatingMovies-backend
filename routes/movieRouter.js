@@ -24,6 +24,7 @@ router.post("/", (req, res) => {
   let movie = new movieModel({
     ...req.body,
   });
+
   movie
     .save()
     .then(() => res.status(201).json({ message: "Movie register sucessfull" }))
@@ -47,12 +48,13 @@ router.get("/:id", (req, res) => {
 
 //Update a movie
 router.patch("/:id", (req, res) => {
-  const movie = movieModel.updateOne(
-    { id: req.params.id },
-    req.body,
-    (err, movie) => {
+  const movie = movieModel.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      ...req.body,
+    },
+    (err) => {
       if (err) {
-        console.log("RETRIEVE error: " + err);
         res.status(500).send("Error");
       } else {
         res.status(200).json(req.body);
