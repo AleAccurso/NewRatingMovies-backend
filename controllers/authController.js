@@ -78,7 +78,7 @@ exports.getUser = (req, res, next) => {
         nickname: loadedUser.nickname,
         email: loadedUser.email,
         isAdmin: loadedUser.isAdmin,
-        favorites: loadedUser.favorites,
+        myFavorites: loadedUser.myFavorites,
         language: loadedUser.language,
         myRates: loadedUser.myRates,
       },
