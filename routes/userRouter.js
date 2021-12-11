@@ -110,7 +110,7 @@ router.patch("/:id/:movieDbId", (req, res) => {
       }
 
       user.save();
-      res.status(200).json(index);
+      res.status(200).json(req.params.movieDbId);
     }
   });
 });
