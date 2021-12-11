@@ -42,7 +42,18 @@ router.patch("/:id", (req, res) => {
   );
 });
 
-// Add/modify/delete a rate
+//Delete a user
+router.delete("/:id", (req, res) => {
+  userModel.deleteOne({ _id: req.params.id }, (err) => {
+    if (err) {
+      res.status(500).send("Error");
+    } else {
+      res.status(200).json("User deleted");
+    }
+  });
+});
+
+// Add, modify & remove a rate
 router.patch("/:id/:movieDbId/:rate", (req, res) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
@@ -85,13 +96,25 @@ router.patch("/:id/:movieDbId/:rate", (req, res) => {
   });
 });
 
-//Delete a user
-router.delete("/:id", (req, res) => {
-  userModel.deleteOne({ _id: req.params.id }, (err) => {
+//Add & remove a favorite
+router.patch("/:id/:movieDbId", (req, res) => {
+  const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
+      console.log("RETRIEVE error: " + err);
       res.status(500).send("Error");
-    } else {
-      res.status(200).json("User deleted");
+    } else if (user) {
+      let index = user.myFavorites.indexOf(req.params.movieDbId);
+      console.log(index);
+      if (index >= 0) {
+        user.myFavorites.splice(index, 1);
+        console.log("fav removed");
+      } else {
+        user.myFavorites.push(req.params.movieDbId);
+        console.log("fav added");
+      }
+
+      user.save();
+      res.status(200).json(index);
     }
   });
 });

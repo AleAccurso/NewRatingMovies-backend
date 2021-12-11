@@ -7,7 +7,7 @@ const UserSchema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isAdmin: { type: Boolean, required: true, default: false },
-    favorites: { type: Array, default: [] },
+    myFavorites: { type: Array, default: [] },
     myRates: { type: Array, default: [] },
     language: { type: String, required: true, default: "fr" },
   },
