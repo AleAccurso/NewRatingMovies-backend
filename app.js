@@ -38,6 +38,8 @@ app
   .patch((req, res) => {}) // Update a user
   .delete((req, res) => {}); //Delete a user
 
+app.patch("/api/users/:id/:movieDbId/:rate", (req, res) => {}); //add, remove & delete rate
+
 //<---------></--------->
 //Movies
 

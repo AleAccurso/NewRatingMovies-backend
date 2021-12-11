@@ -80,6 +80,7 @@ exports.getUser = (req, res, next) => {
         isAdmin: loadedUser.isAdmin,
         favorites: loadedUser.favorites,
         language: loadedUser.language,
+        myRates: loadedUser.myRates,
       },
     });
   } else {

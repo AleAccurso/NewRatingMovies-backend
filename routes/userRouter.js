@@ -42,6 +42,49 @@ router.patch("/:id", (req, res) => {
   );
 });
 
+// Add/modify/delete a rate
+router.patch("/:id/:movieDbId/:rate", (req, res) => {
+  const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
+    if (err) {
+      console.log("RETRIEVE error: " + err);
+      res.status(500).send("Error");
+    } else if (user) {
+      let userChanged = false;
+      let index = user.myRates.findIndex(
+        (rate) => rate.movieDbId === req.params.movieDbId
+      );
+
+      if (index > -1) {
+        if (req.params.rate == 0) {
+          user.myRates.splice(index, 1);
+          userChanged = true;
+        } else {
+          user.myRates[index] = {
+            movieDbId: req.params.movieDbId,
+            rate: req.params.rate * 2,
+          };
+          userChanged = true;
+        }
+      } else if (req.params.rate > 0) {
+        user.myRates.push({
+          movieDbId: req.params.movieDbId,
+          rate: req.params.rate * 2,
+        });
+        userChanged = true;
+      }
+
+      if (userChanged) {
+        user.save();
+      }
+
+      res.status(200).json({
+        movieDbId: req.params.movieDbId,
+        rate: req.params.rate * 2,
+      });
+    }
+  });
+});
+
 //Delete a user
 router.delete("/:id", (req, res) => {
   userModel.deleteOne({ _id: req.params.id }, (err) => {

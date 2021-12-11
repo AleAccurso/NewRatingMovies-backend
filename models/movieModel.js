@@ -31,6 +31,7 @@ const MovieSchema = new Schema(
       poster_path: { type: String, required: true },
     },
   },
+  { timestamps: true },
   { versionKey: false }
 );
 
