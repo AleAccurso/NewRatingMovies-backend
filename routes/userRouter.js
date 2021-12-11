@@ -100,17 +100,13 @@ router.patch("/:id/:movieDbId/:rate", (req, res) => {
 router.patch("/:id/:movieDbId", (req, res) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
-      console.log("RETRIEVE error: " + err);
       res.status(500).send("Error");
     } else if (user) {
       let index = user.myFavorites.indexOf(req.params.movieDbId);
-      console.log(index);
       if (index >= 0) {
         user.myFavorites.splice(index, 1);
-        console.log("fav removed");
       } else {
         user.myFavorites.push(req.params.movieDbId);
-        console.log("fav added");
       }
 
       user.save();
