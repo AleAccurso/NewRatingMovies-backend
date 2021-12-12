@@ -78,8 +78,9 @@ mongoose
     useUnifiedTopology: true,
   })
   .then((result) => {
-    app.listen(process.env.PORT, () =>
-      console.log("server started on port", process.env.PORT)
+    app.listen(
+      process.env.PORT /* , () =>
+      console.log("server started on port", process.env.PORT) */
     );
   })
   .catch((err) => console.log(err));
