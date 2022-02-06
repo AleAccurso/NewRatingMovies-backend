@@ -10,6 +10,7 @@ const UserSchema = new Schema(
     myFavorites: { type: Array, default: [] },
     myRates: { type: Array, default: [] },
     language: { type: String, required: true, default: "fr" },
+    profilePic: { type: String, required: false },
   },
   { timestamps: true },
   { versionKey: false }

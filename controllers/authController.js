@@ -81,6 +81,7 @@ exports.getUser = (req, res, next) => {
         myFavorites: loadedUser.myFavorites,
         language: loadedUser.language,
         myRates: loadedUser.myRates,
+        profilePic: loadedUser.profilePic,
       },
     });
   } else {
