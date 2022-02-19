@@ -4,6 +4,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
+const multer  = require('multer')
+const upload = multer()
+
 // routes
 const authRouter = require("./routes/authRouter");
 const userRouter = require("./routes/userRouter");
@@ -28,6 +31,7 @@ app.use("/api/auth/", authRouter);
 app.use("/api/movies", movieRouter);
 app.use("/api/users", userRouter);
 
+
 //<---------></--------->
 //user
 app.get("api/users", (req, res) => {}); // Get all users
@@ -35,12 +39,13 @@ app.get("api/users", (req, res) => {}); // Get all users
 app
   .route("api/users/:id")
   .get((req, res) => {}) // Get info about a user -->not working
-  .patch((req, res) => {}) // Update a user
+  .put(upload.single('avatar'), (req, res) => {}) // Update a user
   .delete((req, res) => {}); //Delete a user
 
 app.patch("/api/users/:id/:movieDbId/:rate", (req, res) => {}); //add, remove & delete rate
 
 app.patch("/api/users/:id/:movieDbId", (req, res) => {}); //add & remove a favorite
+
 
 //<---------></--------->
 //Movies
@@ -62,7 +67,8 @@ app.post("api/movies/:id/getInfo", (req, res) => {}); // Get information about a
 //Local
 app.post("api/movies/:id/metadata", (req, res) => {}); //Change metadata a MKV file on the hard drive
 
-//
+//<---------></--------->
+//Other Errors
 app.use((error, req, res, next) => {
   console.log(error);
   const status = error.statusCode || 500;
@@ -78,9 +84,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then((result) => {
-    app.listen(
-      process.env.PORT /* , () =>
-      console.log("server started on port", process.env.PORT) */
-    );
+    app.listen(8010, () => console.log("server started on port", 8010));
+    /* app.listen(process.env.PORT); */
   })
   .catch((err) => console.log(err));

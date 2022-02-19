@@ -2,6 +2,28 @@ const express = require("express");
 const userModel = require("../models/userModel");
 const router = express.Router();
 
+//Update user - To manage formData
+const Multer  = require('multer')
+const upload = Multer({
+  storage: Multer.MemoryStorage,
+  limits: {
+    fileSize: 2 * 1024 * 1024, // Maximum file size is 2MB
+  },
+})
+
+// Google Cloud Storage
+const path = require("path");
+const {Storage} = require("@google-cloud/storage");
+
+const gc = new Storage({
+  keyFilename: path.join(__dirname, '../googleCloudStorage-newRatingMovies-profilePic.json'),
+  projectId: 'my-project-1623954720104'
+});
+
+const bucketName = 'new_rating_movies_profile_pics';
+const gcsBucket = gc.bucket('new_rating_movies_profile_pics');
+
+//Routes
 router.get("/", (req, res) => {
   const user = userModel.find({}, (err, users) => {
     if (err) {
@@ -26,7 +48,39 @@ router.get("/:id", (req, res) => {
 });
 
 //update a user
-router.patch("/:id", (req, res) => {
+router.put("/:id", upload.single('avatar'), async (req, res) => {
+  let fileToUpload = req.file
+  let body = req.body
+
+  // Send file to Google Cloud Storage
+  if (fileToUpload) {
+    
+    let newfilename = Math.round((new Date()).getTime());
+    let ext = fileToUpload.mimetype.split('/')[1];
+    fileToUpload.originalname = newfilename + "." + ext;
+    body.profilePic = newfilename + "." + ext;
+
+    const file = gcsBucket.file(fileToUpload.originalname);
+
+    const stream = file.createWriteStream({
+      metadata: {
+        contentType: req.file.mimetype,
+      },
+    });
+
+    stream.on('error', (err) => {
+      req.file.cloudStorageError = err;
+      next(err);
+    });
+  
+    stream.on('finish', () => {
+      req.file.cloudStorageObject = newfilename;
+    });
+  
+    stream.end(req.file.buffer);
+  }
+
+  // Update data in DB
   userModel.findOneAndUpdate(
     { _id: req.params.id },
     {

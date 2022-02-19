@@ -13,7 +13,6 @@ const UserSchema = new Schema(
     profilePic: { type: String, required: false },
   },
   { timestamps: true },
-  { versionKey: false }
 );
 
 module.exports = mongoose.model("User", UserSchema);

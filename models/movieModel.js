@@ -32,7 +32,6 @@ const MovieSchema = new Schema(
     },
   },
   { timestamps: true },
-  { versionKey: false }
 );
 
 module.exports = mongoose.model("Movie", MovieSchema);

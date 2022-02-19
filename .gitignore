@@ -35,3 +35,5 @@ typings/
 # dotenv environment variables file
 .env
 
+# google storage api info
+googleCloudStorage-newRatingMovies-profilePic.json
