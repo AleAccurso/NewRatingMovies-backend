@@ -37,3 +37,6 @@ typings/
 
 # google storage api info
 googleCloudStorage-newRatingMovies-profilePic.json
+
+# vscode
+.vscode/
