@@ -48,7 +48,7 @@ router.get("/:id", (req, res) => {
 });
 
 //update a user
-router.put("/:id", upload.single('avatar'), async (req, res) => {
+router.post("/:id", upload.single('avatar'), async (req, res) => {
   let fileToUpload = req.file
   let body = req.body
 
