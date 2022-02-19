@@ -46,7 +46,6 @@ app.patch("/api/users/:id/:movieDbId/:rate", (req, res) => {}); //add, remove & 
 
 app.patch("/api/users/:id/:movieDbId", (req, res) => {}); //add & remove a favorite
 
-
 //<---------></--------->
 //Movies
 
