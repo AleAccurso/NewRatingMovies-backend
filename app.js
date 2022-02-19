@@ -17,7 +17,9 @@ const app = express();
 
 // Manage HTTP requests
 const cors = require('cors');
-app.use(cors())
+app.use(cors({
+  origin: '*'
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
