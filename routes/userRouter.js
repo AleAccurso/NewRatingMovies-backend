@@ -48,7 +48,7 @@ router.get("/:id", (req, res) => {
 });
 
 //update a user
-router.post("/:id", upload.single('avatar'), async (req, res) => {
+router.post("/:id", upload.single('avatar'), async (req, res, next) => {
   let fileToUpload = req.file
   let body = req.body
 
@@ -60,7 +60,7 @@ router.post("/:id", upload.single('avatar'), async (req, res) => {
 
     if (user.profilePic != "defaultPortrait.png"){
       //Retrieve file from bucket and delete it if exists
-      let oldProfilePic = await gcsBucket.file(user.profilePic);
+      let oldProfilePic = gcsBucket.file(user.profilePic);
 
       oldProfilePic.exists(function(err, exists) {
         if (exists){
