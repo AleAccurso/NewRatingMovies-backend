@@ -16,7 +16,7 @@ const path = require("path");
 const {Storage} = require("@google-cloud/storage");
 
 const gc = new Storage({
-  keyFilename: path.join(__dirname, '../googleCloudStorage-newRatingMovies-profilePic.json'),
+  keyFilename: path.join(__dirname, '../google-credentials.json'),
   projectId: 'my-project-1623954720104'
 });
 
@@ -65,6 +65,9 @@ router.post("/:id", upload.single('avatar'), async (req, res, next) => {
       oldProfilePic.exists(function(err, exists) {
         if (exists){
           oldProfilePic.delete();
+        }
+        if (err) {
+          console.log(err)
         }
       });
     }

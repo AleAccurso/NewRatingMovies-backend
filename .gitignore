@@ -36,7 +36,7 @@ typings/
 .env
 
 # google storage api info
-googleCloudStorage-newRatingMovies-profilePic.json
+google-credentials.json
 
 # vscode
 .vscode/
