@@ -52,14 +52,30 @@ router.post("/:id", upload.single('avatar'), async (req, res) => {
   let fileToUpload = req.file
   let body = req.body
 
-  // Send file to Google Cloud Storage
+  // Manage File in the update request
   if (fileToUpload) {
     
+    // Remove current profilePic from Google Cloud if not the default profile picture
+    let user = await userModel.findById(req.params.id).exec();
+
+    if (user.profilePic != "defaultPortrait.png"){
+      //Retrieve file from bucket and delete it if exists
+      let oldProfilePic = await gcsBucket.file(user.profilePic);
+
+      oldProfilePic.exists(function(err, exists) {
+        if (exists){
+          oldProfilePic.delete();
+        }
+      });
+    }
+
+    // Get a new filename for the file to send to Google Cloud
     let newfilename = Math.round((new Date()).getTime());
     let ext = fileToUpload.mimetype.split('/')[1];
     fileToUpload.originalname = newfilename + "." + ext;
     body.profilePic = newfilename + "." + ext;
 
+    // Send file to Google Cloud Storage
     const file = gcsBucket.file(fileToUpload.originalname);
 
     const stream = file.createWriteStream({
@@ -76,11 +92,11 @@ router.post("/:id", upload.single('avatar'), async (req, res) => {
     stream.on('finish', () => {
       req.file.cloudStorageObject = newfilename;
     });
-  
+   
     stream.end(req.file.buffer);
   }
 
-  // Update data in DB
+  // Manage text field of the update request
   userModel.findOneAndUpdate(
     { _id: req.params.id },
     {
