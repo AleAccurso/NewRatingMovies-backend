@@ -2,26 +2,19 @@ const express = require("express");
 const userModel = require("../models/userModel");
 const router = express.Router();
 
+const util = require("util");
+const { removeOldPic, uploadFile } = require("../helpers/upload")
+
 //Update user - To manage formData
 const Multer  = require('multer')
 const upload = Multer({
   storage: Multer.MemoryStorage,
   limits: {
-    fileSize: 2 * 1024 * 1024, // Maximum file size is 2MB
+    fileSize: 5 * 1024 * 1024, // Maximum file size is 5MB
   },
-})
+}).single("avatar")
 
-// Google Cloud Storage
-const path = require("path");
-const {Storage} = require("@google-cloud/storage");
-
-const gc = new Storage({
-  keyFilename: path.join(__dirname, '../google-credentials.json'),
-  projectId: 'my-project-1623954720104'
-});
-
-const bucketName = 'new_rating_movies_profile_pics';
-const gcsBucket = gc.bucket('new_rating_movies_profile_pics');
+// let processFileMiddleware = util.promisify(upload);
 
 //Routes
 router.get("/", (req, res) => {
@@ -48,62 +41,38 @@ router.get("/:id", (req, res) => {
 });
 
 //update a user
-router.post("/:id", upload.single('avatar'), async (req, res, next) => {
+router.post("/:id", upload, async (req, res) => {
   let fileToUpload = req.file
   let body = req.body
 
+  console.log("profilePic before: ", req.body.profilePic)
+
   // Manage File in the update request
   if (fileToUpload) {
-    
-    // Remove current profilePic from Google Cloud if not the default profile picture
-    let user = await userModel.findById(req.params.id).exec();
+    // Remove old file
+    const remove = await removeOldPic(req.params.id);
 
-    if (user.profilePic != "defaultPortrait.png"){
-      //Retrieve file from bucket and delete it if exists
-      let oldProfilePic = gcsBucket.file(user.profilePic);
-
-      oldProfilePic.exists(function(err, exists) {
-        if (exists){
-          oldProfilePic.delete();
-        }
-        if (err) {
-          console.log(err)
-        }
-      });
-    }
-
-    // Get a new filename for the file to send to Google Cloud
+    // Get a new filename for the file
     let newfilename = Math.round((new Date()).getTime());
-    let ext = fileToUpload.mimetype.split('/')[1];
-    fileToUpload.originalname = newfilename + "." + ext;
+    let ext = req.file.mimetype.split('/')[1];
+    req.file.originalname = newfilename + "." + ext;
     body.profilePic = newfilename + "." + ext;
-
+    
     // Send file to Google Cloud Storage
-    const file = gcsBucket.file(fileToUpload.originalname);
-
-    const stream = file.createWriteStream({
-      metadata: {
-        contentType: req.file.mimetype,
-      },
-    });
-
-    stream.on('error', (err) => {
-      req.file.cloudStorageError = err;
-      next(err);
-    });
-  
-    stream.on('finish', () => {
-      req.file.cloudStorageObject = newfilename;
-    });
-   
-    stream.end(req.file.buffer);
+    try{
+      await util.promisify(upload);
+      const uploaded = await uploadFile(req, res)
+    } catch (error) {
+      res.status(500).send({ message: err.message });
+    }
   }
-
+    
+  console.log("profilePic after: ", body.profilePic)
   // Manage text field of the update request
   userModel.findOneAndUpdate(
     { _id: req.params.id },
     {
-      ...req.body,
+      ...body,
     },
     (err) => {
       if (err) {

@@ -41,7 +41,7 @@ app.get("api/users", (req, res) => {}); // Get all users
 app
   .route("api/users/:id")
   .get((req, res) => {}) // Get info about a user -->not working
-  .post(upload.single('avatar'), (req, res, next) => {}) // Update a user
+  .post(upload.single('avatar'), (req, res) => {}) // Update a user
   .delete((req, res) => {}); //Delete a user
 
 app.patch("/api/users/:id/:movieDbId/:rate", (req, res) => {}); //add, remove & delete rate
