@@ -45,8 +45,6 @@ router.post("/:id", upload, async (req, res) => {
   let fileToUpload = req.file
   let body = req.body
 
-  console.log("profilePic before: ", req.body.profilePic)
-
   // Manage File in the update request
   if (fileToUpload) {
     // Remove old file
@@ -67,7 +65,6 @@ router.post("/:id", upload, async (req, res) => {
     }
   }
     
-  console.log("profilePic after: ", body.profilePic)
   // Manage text field of the update request
   userModel.findOneAndUpdate(
     { _id: req.params.id },
