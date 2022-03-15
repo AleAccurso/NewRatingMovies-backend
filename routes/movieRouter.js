@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+const checkAuth = require('../middleware/check-auth');
+const isAdmin = require('../middleware/isAdmin');
+
 const express = require("express");
 const router = express.Router();
 const movieModel = require("../models/movieModel");
@@ -20,7 +23,7 @@ router.get("/", (req, res) => {
 });
 
 //Add a movie
-router.post("/", (req, res) => {
+router.post("/", isAdmin, (req, res) => {
   let movie = new movieModel({
     ...req.body,
   });
@@ -32,7 +35,7 @@ router.post("/", (req, res) => {
 });
 
 //Get a specific movie by movieDbId
-router.get("/:id", (req, res) => {
+router.get("/:id", isAdmin, (req, res) => {
   const movies = movieModel.findOne(
     { movieDbId: req.params.id },
     (err, movies) => {
@@ -47,7 +50,7 @@ router.get("/:id", (req, res) => {
 });
 
 //Update a movie
-router.patch("/:id", (req, res) => {
+router.patch("/:id", isAdmin, (req, res) => {
   const movie = movieModel.findOneAndUpdate(
     { _id: req.params.id },
     {
@@ -64,7 +67,7 @@ router.patch("/:id", (req, res) => {
 });
 
 //Delete movie from DB
-router.route("/:id").delete((req, res) => {
+router.delete("/:id", isAdmin, (req, res) => {
   movieModel.deleteOne({ id: req.params.id }, (err) => {
     if (err) {
       res.status(500).send("Error");
@@ -75,7 +78,7 @@ router.route("/:id").delete((req, res) => {
 });
 
 //Get search result from api
-router.post("/search/:title/:language", (req, res) => {
+router.post("/search/:title/:language", isAdmin, (req, res) => {
   let url =
     process.env.API_URL +
     "/search/movie?api_key=" +
@@ -211,7 +214,7 @@ router.post("/:id/getInfo", async (req, res) => {
 });
 
 //Change metadata
-router.post("/:id/metadata", (req, res) => {
+router.post("/:id/metadata", isAdmin, (req, res) => {
   const job = req.body;
 
   //Get file extension

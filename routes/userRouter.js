@@ -1,6 +1,8 @@
 const express = require("express");
 const userModel = require("../models/userModel");
 const router = express.Router();
+const checkAuth = require('../middleware/check-auth');
+const isAdmin = require('../middleware/isAdmin');
 
 const util = require("util");
 const { removeOldPic, uploadFile } = require("../helpers/upload")
@@ -17,7 +19,7 @@ const upload = Multer({
 // let processFileMiddleware = util.promisify(upload);
 
 //Routes
-router.get("/", (req, res) => {
+router.get("/", isAdmin, (req, res, next) => {
   const user = userModel.find({}, (err, users) => {
     if (err) {
       console.log("RETRIEVE error: " + err);
@@ -29,7 +31,7 @@ router.get("/", (req, res) => {
 });
 
 //Get a user
-router.get("/:id", (req, res) => {
+router.get("/:id", isAdmin, (req, res) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
       console.log("RETRIEVE error: " + err);
@@ -41,7 +43,7 @@ router.get("/:id", (req, res) => {
 });
 
 //update a user
-router.post("/:id", upload, async (req, res) => {
+router.post("/:id", isAdmin, upload, async (req, res) => {
   let fileToUpload = req.file
   let body = req.body
 
@@ -82,7 +84,7 @@ router.post("/:id", upload, async (req, res) => {
 });
 
 //Delete a user
-router.delete("/:id", (req, res) => {
+router.delete("/:id", isAdmin, (req, res) => {
   userModel.deleteOne({ _id: req.params.id }, (err) => {
     if (err) {
       res.status(500).send("Error");
@@ -93,7 +95,7 @@ router.delete("/:id", (req, res) => {
 });
 
 // Add, modify & remove a rate
-router.patch("/:id/:movieDbId/:rate", (req, res) => {
+router.patch("/:id/:movieDbId/:rate", checkAuth, (req, res) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
       console.log("RETRIEVE error: " + err);
@@ -136,7 +138,7 @@ router.patch("/:id/:movieDbId/:rate", (req, res) => {
 });
 
 //Add & remove a favorite
-router.patch("/:id/:movieDbId", (req, res) => {
+router.patch("/:id/:movieDbId", checkAuth, (req, res) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
       res.status(500).send("Error");
