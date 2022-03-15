@@ -1,6 +1,5 @@
 require("dotenv").config();
 
-const checkAuth = require('../middleware/check-auth');
 const isAdmin = require('../middleware/isAdmin');
 
 const express = require("express");

@@ -1,7 +1,10 @@
 const jwt = require("jsonwebtoken");
+const userModel = require("../models/userModel");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
+
   const authHeader = req.get("Authorization");
+
   if (!authHeader) {
     const error = new Error("Not authenticated.");
     error.statusCode = 401;
@@ -20,7 +23,11 @@ module.exports = (req, res, next) => {
     error.statusCode = 401;
     throw error;
   }
-  req.userId = decodedToken.userId;
+  let user = await userModel.findOne({ email: decodedToken.email });
+  if(user){
+    req.userId = user._id
+    req.userRole = user.isAdmin
+  }
   next();
 };
 

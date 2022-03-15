@@ -1,7 +1,7 @@
 const express = require("express");
 const userModel = require("../models/userModel");
 const router = express.Router();
-const checkAuth = require('../middleware/check-auth');
+const isAuth = require('../middleware/isAuth');
 const isAdmin = require('../middleware/isAdmin');
 
 const util = require("util");
@@ -19,7 +19,7 @@ const upload = Multer({
 // let processFileMiddleware = util.promisify(upload);
 
 //Routes
-router.get("/", isAdmin, (req, res, next) => {
+router.get("/", (req, res, next) => {
   const user = userModel.find({}, (err, users) => {
     if (err) {
       console.log("RETRIEVE error: " + err);
@@ -31,71 +31,92 @@ router.get("/", isAdmin, (req, res, next) => {
 });
 
 //Get a user
-router.get("/:id", isAdmin, (req, res) => {
-  const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
-    if (err) {
-      console.log("RETRIEVE error: " + err);
-      res.status(500).send("Error");
-    } else if (user) {
-      res.status(200).json(user);
-    }
-  });
+router.get("/:id", isAuth, (req, res) => {
+  let userId = req.userId
+  let userRole = req.userRole
+
+  if (userRole || userId === req.params.id){
+    const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
+      if (err) {
+        console.log("RETRIEVE error: " + err);
+        res.status(500).send("Error");
+      } else if (user) {
+        res.status(200).json(user);
+      }
+    });
+  } else{
+    res.status(401).send("Not authorized.")
+  }
 });
 
 //update a user
-router.post("/:id", isAdmin, upload, async (req, res) => {
+router.post("/:id", isAuth, upload, async (req, res) => {
   let fileToUpload = req.file
   let body = req.body
 
-  // Manage File in the update request
-  if (fileToUpload) {
-    // Remove old file
-    const remove = await removeOldPic(req.params.id);
+  let userId = req.userId
+  let userRole = req.userRole
 
-    // Get a new filename for the file
-    let newfilename = Math.round((new Date()).getTime());
-    let ext = req.file.mimetype.split('/')[1];
-    req.file.originalname = newfilename + "." + ext;
-    body.profilePic = newfilename + "." + ext;
-    
-    // Send file to Google Cloud Storage
-    try{
-      await util.promisify(upload);
-      const uploaded = await uploadFile(req, res)
-    } catch (error) {
-      res.status(500).send({ message: err.message });
-    }
-  }
-    
-  // Manage text field of the update request
-  userModel.findOneAndUpdate(
-    { _id: req.params.id },
-    {
-      ...body,
-    },
-    (err) => {
-      if (err) {
-        res.status(500).send("Error");
-      } else {
-        res.status(200).json(req.body);
+  if (userRole || userId === req.params.id){
+    // Manage File in the update request
+    if (fileToUpload) {
+      // Remove old file
+      const remove = await removeOldPic(req.params.id);
+
+      // Get a new filename for the file
+      let newfilename = Math.round((new Date()).getTime());
+      let ext = req.file.mimetype.split('/')[1];
+      req.file.originalname = newfilename + "." + ext;
+      body.profilePic = newfilename + "." + ext;
+      
+      // Send file to Google Cloud Storage
+      try{
+        await util.promisify(upload);
+        const uploaded = await uploadFile(req, res)
+      } catch (error) {
+        res.status(500).send({ message: err.message });
       }
     }
-  );
+      
+    // Manage text field of the update request
+    userModel.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        ...body,
+      },
+      (err) => {
+        if (err) {
+          res.status(500).send("Error");
+        } else {
+          res.status(200).json(req.body);
+        }
+      }
+    );
+  } else{
+    res.status(401).send("Not authorized.")
+  }
 });
 
 //Delete a user
 router.delete("/:id", isAdmin, (req, res) => {
-  userModel.deleteOne({ _id: req.params.id }, (err) => {
-    if (err) {
-      res.status(500).send("Error");
-    } else {
-      res.status(200).json("User deleted");
-    }
-  });
+  let userId = req.userId
+  let userRole = req.userRole
+
+  if (userRole || userId === req.params.id){
+    userModel.deleteOne({ _id: req.params.id }, (err) => {
+      if (err) {
+        res.status(500).send("Error");
+      } else {
+        res.status(200).json("User deleted");
+      }
+    });
+  } else{
+    res.status(401).send("Not authorized.")
+  }
 });
 
 // Add, modify & remove a rate
-router.patch("/:id/:movieDbId/:rate", checkAuth, (req, res) => {
+router.patch("/:id/:movieDbId/:rate", isAuth, (req, res) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
       console.log("RETRIEVE error: " + err);
@@ -138,7 +159,7 @@ router.patch("/:id/:movieDbId/:rate", checkAuth, (req, res) => {
 });
 
 //Add & remove a favorite
-router.patch("/:id/:movieDbId", checkAuth, (req, res) => {
+router.patch("/:id/:movieDbId", isAuth, (req, res) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
       res.status(500).send("Error");

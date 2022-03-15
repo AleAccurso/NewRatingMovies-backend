@@ -70,6 +70,18 @@ exports.postLogin = async (req, res, next) => {
   }
 };
 
+exports.logout = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  jwt.sign(authHeader, "", { expiresIn: 1 } , (logout, err) => {
+    if (logout) {
+      res.status(200).send({msg : 'You have been Logged Out' });
+    } else {
+      res.status(200).send({msg : 'Cannot log out.'});
+    }
+  })
+}
+
 exports.getUser = (req, res, next) => {
   if (loadedUser) {
     res.status(200).json({
