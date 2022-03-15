@@ -35,7 +35,7 @@ router.get("/:id", isAuth, (req, res) => {
   let userId = req.userId
   let userRole = req.userRole
 
-  if (userRole || userId === req.params.id){
+  if (userRole || userId == req.params.id){
     const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
       if (err) {
         console.log("RETRIEVE error: " + err);
@@ -55,9 +55,13 @@ router.post("/:id", isAuth, upload, async (req, res) => {
   let body = req.body
 
   let userId = req.userId
+  console.log("🚀 ~ file: userRouter.js ~ line 58 ~ router.post ~ userId", userId)
   let userRole = req.userRole
+  console.log("🚀 ~ file: userRouter.js ~ line 60 ~ router.post ~ userRole", userRole)
 
-  if (userRole || userId === req.params.id){
+  console.log("param - id:", req.params.id)
+
+  if (userRole || userId == req.params.id){
     // Manage File in the update request
     if (fileToUpload) {
       // Remove old file
@@ -102,7 +106,7 @@ router.delete("/:id", isAdmin, (req, res) => {
   let userId = req.userId
   let userRole = req.userRole
 
-  if (userRole || userId === req.params.id){
+  if (userRole || userId == req.params.id){
     userModel.deleteOne({ _id: req.params.id }, (err) => {
       if (err) {
         res.status(500).send("Error");
