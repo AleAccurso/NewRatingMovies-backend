@@ -55,11 +55,7 @@ router.post("/:id", isAuth, upload, async (req, res) => {
   let body = req.body
 
   let userId = req.userId
-  console.log("🚀 ~ file: userRouter.js ~ line 58 ~ router.post ~ userId", userId)
   let userRole = req.userRole
-  console.log("🚀 ~ file: userRouter.js ~ line 60 ~ router.post ~ userRole", userRole)
-
-  console.log("param - id:", req.params.id)
 
   if (userRole || userId == req.params.id){
     // Manage File in the update request
