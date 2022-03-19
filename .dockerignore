@@ -1,0 +1,6 @@
+/node_modules
+dockerfile
+google-credentials.json
+.dockerignore
+.git
+.gitignore

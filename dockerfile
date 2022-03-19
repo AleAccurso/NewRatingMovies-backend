@@ -1,7 +1,7 @@
 FROM node:16.14.0-alpine
 
-RUN mkdir -p /app
-WORKDIR /app
+RUN mkdir -p /opt/backend
+WORKDIR /opt/backend
 
 # RUN apk add -no-cache nodejs npm
 
@@ -9,7 +9,8 @@ WORKDIR /app
 COPY package.json ./
 
 # update and install dependencies
-RUN apk update && apk upgrade
+RUN apk update
+RUN apk upgrade
 RUN npm install
 
 # If you are building your code for production
