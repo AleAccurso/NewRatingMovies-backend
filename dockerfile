@@ -1,7 +1,9 @@
-FROM node:16.14.0-alpine
+FROM node:16.12.0-alpine as backend
 
-RUN mkdir -p /opt/backend
-WORKDIR /opt/backend
+RUN npm install -g npm@8.5.5
+
+RUN mkdir -p /backend
+WORKDIR /backend
 
 # RUN apk add -no-cache nodejs npm
 
@@ -9,16 +11,15 @@ WORKDIR /opt/backend
 COPY package.json ./
 
 # update and install dependencies
-RUN apk update
-RUN apk upgrade
 RUN npm install
 
 # If you are building your code for production
 # RUN npm ci --only=production
 
 # Bundle app source
-COPY . .
+# COPY . .
+ADD . /backend/
 
-CMD [ "npm", "run", "dev" ]
+CMD [ "npm", "run", "start" ]
 
 EXPOSE 8010

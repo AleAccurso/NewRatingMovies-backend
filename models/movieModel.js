@@ -14,24 +14,28 @@ const MovieSchema = new Schema(
       title: { type: String, required: true },
       overview: { type: String, required: true },
       poster_path: { type: String, required: true },
+      trailers: { type: Array, required: true },
     },
     fr: {
       title: { type: String, required: true },
       overview: { type: String, required: true },
       poster_path: { type: String, required: true },
+      trailers: { type: Array, required: true },
     },
     nl: {
       title: { type: String, required: true },
       overview: { type: String, required: true },
       poster_path: { type: String, required: true },
+      trailers: { type: Array, required: true },
     },
     it: {
       title: { type: String, required: true },
       overview: { type: String, required: true },
       poster_path: { type: String, required: true },
+      trailers: { type: Array, required: true },
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Movie", MovieSchema);
