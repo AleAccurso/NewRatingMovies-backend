@@ -103,9 +103,9 @@ exports.getInfoFromAPI = async (req, res, next) => {
     });
 
   //Add information of the other languages
-  let otherLangs = ["en", "fr", "nl", "it"];
+  let langList = process.env.LANGUAGES;
 
-  for (let index = 0; index < otherLangs.length; index++) {
+  for (let index = 0; index < langList.length; index++) {
     await axios
       .get(
         process.env.API_URL +
@@ -114,11 +114,11 @@ exports.getInfoFromAPI = async (req, res, next) => {
           "?api_key=" +
           process.env.API_TOKEN +
           "&language=" +
-          otherLangs[index]
+          langList[index]
       )
       .then((response) => {
         fullMovieData = response.data;
-        infoToReturn[otherLangs[index]] = {
+        infoToReturn[langList[index]] = {
           title: fullMovieData["title"],
           overview: fullMovieData["overview"],
           poster_path: fullMovieData["poster_path"],
@@ -136,13 +136,16 @@ exports.getInfoFromAPI = async (req, res, next) => {
           "/videos?api_key=" +
           process.env.API_TOKEN +
           "&language=" +
-          otherLangs[index]
+          langList[index]
       )
       .then((response) => {
         videos = response.data.results;
         let movieTrailers = [];
         videos.forEach((video) => {
-          if (video.site == "YouTube") {
+          if (
+            video.site == "YouTube" &&
+            ["Trailer", "Teaser"].includes(video.type)
+          ) {
             let toAdd = {
               name: video.name,
               key: video.key,
@@ -150,7 +153,7 @@ exports.getInfoFromAPI = async (req, res, next) => {
             movieTrailers.push(toAdd);
           }
         });
-        infoToReturn[otherLangs[index]].trailers = movieTrailers;
+        infoToReturn[langList[index]].trailers = movieTrailers;
       });
   }
   res.status(200).json(infoToReturn);
