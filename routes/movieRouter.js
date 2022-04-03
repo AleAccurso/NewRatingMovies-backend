@@ -18,4 +18,6 @@ router
 
 router.post("/:id/metadata", isAdmin, movieController.updateMetaData); //Change metadata a MKV file on the hard drive
 
+router.get("/check/:movieDBId", isAdmin, movieController.isInDB); //Change metadata a MKV file on the hard drive
+
 module.exports = router;
