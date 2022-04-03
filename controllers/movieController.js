@@ -126,7 +126,7 @@ exports.addMovie = async (req, res, next) => {
 exports.getMovieById = async (req, res, next) => {
   const movies = movieModel.findOne({ _id: req.params.id }, (err, movie) => {
     if (err) {
-      res.status(500).send({ message: msg.SERVER_ERROR });
+      res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "movie" });
     } else if (movies) {
       res.status(200).json(movie);
     }
@@ -152,11 +152,19 @@ exports.updateMovie = async (req, res, next) => {
 
 //Delete movie from DB
 exports.deleteMovie = async (req, res, next) => {
-  movieModel.deleteOne({ id: req.params.id }, (err) => {
+  const movies = movieModel.findOne({ _id: req.params.id }, (err, movie) => {
     if (err) {
-      res.status(500).send({ message: msg.SERVER_ERROR });
-    } else {
-      res.status(200).json({ message: msg.SUCCESS_ACTION + "delete_movie" });
+      res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "movie" });
+    } else if (movies) {
+      movieModel.deleteOne({ id: req.params.id }, (err) => {
+        if (err) {
+          res.status(500).send({ message: msg.SERVER_ERROR });
+        } else {
+          res
+            .status(200)
+            .json({ message: msg.SUCCESS_ACTION + "delete_movie" });
+        }
+      });
     }
   });
 };
@@ -198,4 +206,18 @@ exports.updateMetaData = async (req, res, next) => {
   } else {
     res.status(400).json({ message: msg.BAD_DATA + "mkv_required" });
   }
+};
+
+// Checks if a movie with the concerned movieDBId is in DB
+exports.isInDB = async (req, res, next) => {
+  const movies = movieModel.findOne(
+    { movieDbId: req.params.movieDBId },
+    (err, movie) => {
+      if (err) {
+        res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "movie" });
+      } else if (movies) {
+        res.status(200).json(movie);
+      }
+    }
+  );
 };

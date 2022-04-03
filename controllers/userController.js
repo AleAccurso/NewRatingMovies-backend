@@ -38,7 +38,7 @@ exports.getUserById = async (req, res, next) => {
   if (userRole || userId == req.params.id) {
     const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
       if (err) {
-        res.status(500).send({ message: msg.SERVER_ERROR });
+        res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "user" });
       } else if (user) {
         res.status(200).json(user);
       }
@@ -102,11 +102,19 @@ exports.deleteUser = async (req, res, next) => {
   let userRole = req.userRole;
 
   if (userRole || userId == req.params.id) {
-    userModel.deleteOne({ _id: req.params.id }, (err) => {
+    const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
       if (err) {
-        res.status(500).send({ message: msg.SERVER_ERROR });
-      } else {
-        res.status(200).json({ message: msg.SUCCESS_ACTION + "delete_user" });
+        res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "user" });
+      } else if (user) {
+        userModel.deleteOne({ _id: req.params.id }, (err) => {
+          if (err) {
+            res.status(500).send({ message: msg.SERVER_ERROR });
+          } else {
+            res
+              .status(200)
+              .json({ message: msg.SUCCESS_ACTION + "delete_user" });
+          }
+        });
       }
     });
   } else {
