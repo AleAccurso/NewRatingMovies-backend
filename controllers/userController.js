@@ -191,7 +191,7 @@ exports.getFavorites = async (req, res, next) => {
     nbFavorites: nbMovies,
     page: pageInt,
     perPage: sizeInt,
-    data: movies,
+    movies: movies,
   });
 };
 
