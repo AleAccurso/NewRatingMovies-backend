@@ -46,7 +46,7 @@ exports.login = async (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({
-        message: msg.RESOURCE_NOT_FOUND + "user_email",
+        message: msg.RESOURCE_NOT_FOUND + "user",
       });
     }
     loadedUser = user;
@@ -77,14 +77,20 @@ exports.login = async (req, res, next) => {
 };
 
 exports.logout = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  jwt.sign(authHeader, "", { expiresIn: 1 }, (logout, err) => {
-    if (authHeader) {
-      res.status(200).send({ msg: msg.SUCCESS_ACTION + "logout" });
-    } else {
-      res.status(404).send({ msg: authMsg.NOBODY_LOGGED });
-    }
-  });
+  try {
+    const authHeader = req.headers.authorization;
+    jwt.sign(authHeader, "", { expiresIn: 1 }, (logout, err) => {
+      if (authHeader) {
+        res.status(200).send({ msg: msg.SUCCESS_ACTION + "logout" });
+      } else {
+        res.status(404).send({ msg: authMsg.NOBODY_LOGGED });
+      }
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: msg.SERVER_ERROR,
+    });
+  }
 };
 
 exports.getUser = (req, res, next) => {

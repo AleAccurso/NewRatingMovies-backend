@@ -18,9 +18,7 @@ const upload = Multer({
 /*
   User routes
 */
-
-// Get all users
-router.get("/", userController.getUsers);
+router.get("/", userController.getUsers); // Get all users
 
 router
   .route("/:id")
@@ -28,10 +26,15 @@ router
   .post(isAuth, upload, userController.updateUser) // Update a user
   .delete(isAdmin, userController.deleteUser); // Delete a user
 
-//add, remove & delete rate
-router.patch("/:id/:movieDbId/:rate", isAuth, userController.userRate);
+router.patch("/:id/:movieDbId/:rate", isAuth, userController.userRate); //add, remove & delete rate
+
+router.get("/:id/favorites", isAuth, userController.getFavorites); // Get userFavorites with movies information
 
 //add & remove a favorite
-router.patch("/:id/:movieDbId", isAuth, userController.userFavorite);
+router.patch(
+  "/:id/favorites/:movieDbId",
+  isAuth,
+  userController.updateFavorite
+);
 
 module.exports = router;

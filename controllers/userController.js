@@ -1,4 +1,6 @@
 const userModel = require("../models/userModel");
+const movieModel = require("../models/movieModel");
+
 const { removeOldPic, uploadPic } = require("./userPicController");
 
 const util = require("util");
@@ -164,8 +166,25 @@ exports.userRate = async (req, res, next) => {
   });
 };
 
+// Get info of favorite movies
+exports.getFavorites = async (req, res, next) => {
+  let movies = [];
+
+  const user = await userModel.findOne({ _id: req.params.id }).exec();
+
+  await Promise.all(
+    user.myFavorites.map(async (id) => {
+      await movieModel.findOne({ movieDbId: id }).then((movieInfo) => {
+        movies.push(movieInfo);
+      });
+    })
+  );
+
+  res.status(200).json(movies);
+};
+
 //Add & remove a favorite
-exports.userFavorite = async (req, res, next) => {
+exports.updateFavorite = async (req, res, next) => {
   const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
     if (err) {
       res.status(500).send({ message: msg.SERVER_ERROR });
