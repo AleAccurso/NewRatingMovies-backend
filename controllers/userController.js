@@ -168,9 +168,12 @@ exports.userRate = async (req, res, next) => {
 
 // Get info of favorite movies
 exports.getFavorites = async (req, res, next) => {
-  let movies = [];
+  pageInt = parseInt(req.query.page);
+  sizeInt = parseInt(req.query.size);
 
   const user = await userModel.findOne({ _id: req.params.id }).exec();
+
+  let movies = [];
 
   await Promise.all(
     user.myFavorites.map(async (id) => {
@@ -180,7 +183,16 @@ exports.getFavorites = async (req, res, next) => {
     })
   );
 
-  res.status(200).json(movies);
+  let nbMovies = movies.length;
+
+  movies = movies.slice(pageInt * sizeInt, sizeInt + pageInt * sizeInt);
+
+  res.status(200).json({
+    nbFavorites: nbMovies,
+    page: pageInt,
+    perPage: sizeInt,
+    data: movies,
+  });
 };
 
 //Add & remove a favorite
