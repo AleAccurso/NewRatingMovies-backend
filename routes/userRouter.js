@@ -31,10 +31,6 @@ router.patch("/:id/:movieDbId/:rate", isAuth, userController.userRate); //add, r
 router.get("/:id/favorites", isAuth, userController.getFavorites); // Get userFavorites with movies information
 
 //add & remove a favorite
-router.patch(
-  "/:id/favorites/:movieDbId",
-  isAuth,
-  userController.updateFavorite
-);
+router.post("/:id/favorites/:movieDbId", isAuth, userController.updateFavorite);
 
 module.exports = router;

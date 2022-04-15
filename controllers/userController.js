@@ -209,7 +209,7 @@ exports.updateFavorite = async (req, res, next) => {
       }
 
       user.save();
-      res.status(200).json(req.params.movieDbId);
+      res.status(200).json({ movieDbId: req.params.movieDbId });
     }
   });
 };

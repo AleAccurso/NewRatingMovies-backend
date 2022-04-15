@@ -155,14 +155,17 @@ exports.deleteMovie = async (req, res, next) => {
   const movies = movieModel.findOne({ _id: req.params.id }, (err, movie) => {
     if (err) {
       res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "movie" });
-    } else if (movies) {
+    } else if (movie) {
       movieModel.deleteOne({ id: req.params.id }, (err) => {
         if (err) {
           res.status(500).send({ message: msg.SERVER_ERROR });
         } else {
           res
             .status(200)
-            .json({ message: msg.SUCCESS_ACTION + "delete_movie" });
+            .json({
+              message: msg.SUCCESS_ACTION + "delete_movie",
+              deletedId: movie._id,
+            });
         }
       });
     }
