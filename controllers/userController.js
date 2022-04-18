@@ -178,7 +178,9 @@ exports.getFavorites = async (req, res, next) => {
   await Promise.all(
     user.myFavorites.map(async (id) => {
       await movieModel.findOne({ movieDbId: id }).then((movieInfo) => {
-        movies.push(movieInfo);
+        if (movieInfo) {
+          movies.push(movieInfo);
+        }
       });
     })
   );

@@ -164,8 +164,8 @@ exports.deleteMovie = async (req, res, next) => {
         .find()
         .cursor()
         .eachAsync((user) => {
-          if (user.myFavorites.includes(idToRemove)) {
-            const index = user.myFavorites.indexOf(idToRemove);
+          if (user.myFavorites.includes(movie.movieDbId)) {
+            const index = user.myFavorites.indexOf(movie.movieDbId);
             if (index > -1) {
               user.myFavorites.splice(index, 1);
             }
