@@ -169,9 +169,7 @@ exports.userRate = async (req, res, next) => {
 // Get info of favorite movies
 exports.getFavorites = async (req, res, next) => {
   pageInt = parseInt(req.query.page);
-  console.log("🚀 ~ exports.getFavorites= ~ pageInt", pageInt);
   sizeInt = parseInt(req.query.size);
-  console.log("🚀 ~ exports.getFavorites= ~ sizeInt", sizeInt);
 
   const user = await userModel.findOne({ _id: req.params.id }).exec();
 
@@ -195,8 +193,6 @@ exports.getFavorites = async (req, res, next) => {
     perPage: sizeInt,
     movies: movies,
   };
-
-  console.log("🚀 ~ exports.getFavorites= ~ toReturn", toReturn);
 
   res.status(200).json(toReturn);
 };

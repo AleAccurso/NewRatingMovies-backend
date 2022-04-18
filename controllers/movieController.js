@@ -159,6 +159,19 @@ exports.deleteMovie = async (req, res, next) => {
     if (err) {
       res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "movie" });
     } else if (movie) {
+      // Remove movie if movie in favorite of a user
+      userModel
+        .find()
+        .cursor()
+        .eachAsync((user) => {
+          if (user.myFavorites.includes(idToRemove)) {
+            const index = user.myFavorites.indexOf(idToRemove);
+            if (index > -1) {
+              user.myFavorites.splice(index, 1);
+            }
+          }
+        });
+
       // Remove movie from DB
       movieModel.deleteOne({ id: idToRemove }, (err) => {
         if (err) {
@@ -168,16 +181,6 @@ exports.deleteMovie = async (req, res, next) => {
             message: msg.SUCCESS_ACTION + "delete_movie",
             deletedId: movie._id,
           });
-        }
-      });
-
-      // Remove movie if movie in favorite of a user
-      userModel.forEach((user) => {
-        if (user.myFavorites.includes(idToRemove)) {
-          const index = user.myFavorites.indexOf(idToRemove);
-          if (index > -1) {
-            user.myFavorites.splice(index, 1);
-          }
         }
       });
     }
