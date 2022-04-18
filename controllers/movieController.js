@@ -1,6 +1,8 @@
 require("dotenv").config();
 
 const movieModel = require("../models/movieModel");
+const userModel = require("../models/userModel");
+
 const { msg } = require("../constants/response_messages");
 const { exec } = require("child_process");
 const { Console } = require("console");
@@ -152,20 +154,30 @@ exports.updateMovie = async (req, res, next) => {
 
 //Delete movie from DB
 exports.deleteMovie = async (req, res, next) => {
-  const movies = movieModel.findOne({ _id: req.params.id }, (err, movie) => {
+  idToRemove = req.params.id;
+  const movies = movieModel.findOne({ _id: idToRemove }, (err, movie) => {
     if (err) {
       res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "movie" });
     } else if (movie) {
-      movieModel.deleteOne({ id: req.params.id }, (err) => {
+      // Remove movie from DB
+      movieModel.deleteOne({ id: idToRemove }, (err) => {
         if (err) {
           res.status(500).send({ message: msg.SERVER_ERROR });
         } else {
-          res
-            .status(200)
-            .json({
-              message: msg.SUCCESS_ACTION + "delete_movie",
-              deletedId: movie._id,
-            });
+          res.status(200).json({
+            message: msg.SUCCESS_ACTION + "delete_movie",
+            deletedId: movie._id,
+          });
+        }
+      });
+
+      // Remove movie if movie in favorite of a user
+      userModel.forEach((user) => {
+        if (user.myFavorites.includes(idToRemove)) {
+          const index = user.myFavorites.indexOf(idToRemove);
+          if (index > -1) {
+            user.myFavorites.splice(index, 1);
+          }
         }
       });
     }
