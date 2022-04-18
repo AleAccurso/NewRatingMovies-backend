@@ -159,15 +159,25 @@ exports.deleteMovie = async (req, res, next) => {
     if (err) {
       res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + "movie" });
     } else if (movie) {
-      // Remove movie if movie in favorite of a user
+      // Remove movie if movie in favorite and/or rate of a user
       userModel
         .find()
         .cursor()
         .eachAsync((user) => {
+          // Favorites
           if (user.myFavorites.includes(movie.movieDbId)) {
             const index = user.myFavorites.indexOf(movie.movieDbId);
             if (index > -1) {
               user.myFavorites.splice(index, 1);
+            }
+          }
+          //Rates
+          console.log("rates:", user.myRates);
+          console.log("movie to remove:", movie.movieDbId);
+          for (let i = 0; i < user.myRates.length; i++) {
+            if (user.myRates[i].movieDbId == movie.movieDbId) {
+              console.log("in");
+              user.myRates.splice(i, 1);
             }
           }
         });
