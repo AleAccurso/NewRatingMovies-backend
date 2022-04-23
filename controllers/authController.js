@@ -7,7 +7,7 @@ const { authMsg, msg } = require("../constants/response_messages");
 exports.register = async (req, res, next) => {
   const { name, email, password, language } = req.body;
   try {
-    const existUser = await userModel.findOne({ email: email });
+    const existUser = await userModel.findOne({ email: email }).exec();
     if (existUser) {
       return res.status(409).json({
         message: msg.RESOURCE_EXISTS + "email",
@@ -42,7 +42,7 @@ exports.login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const user = await userModel.findOne({ email: email });
+    const user = await userModel.findOne({ email: email }).exec();
 
     if (!user) {
       return res.status(401).json({
@@ -51,7 +51,7 @@ exports.login = async (req, res, next) => {
     }
     loadedUser = user;
 
-    const comparePassword = bcrypt.compare(password, user.password);
+    const comparePassword = await bcrypt.compare(password, user.password);
 
     if (!comparePassword) {
       return res.status(401).json({

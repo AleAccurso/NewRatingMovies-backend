@@ -1,7 +1,8 @@
 const axios = require("axios");
+const { msg } = require("../constants/response_messages");
 
 //Get search result from api
-exports.getSearchResultsFromAPI = async (req, res, next) => {
+exports.getSearchResultsFromAPI = (req, res, next) => {
   let url =
     process.env.API_URL +
     "/search/movie?api_key=" +
@@ -10,7 +11,7 @@ exports.getSearchResultsFromAPI = async (req, res, next) => {
     req.params.title.replace(" ", "+") +
     "&language=" +
     req.params.language;
-  let toReturn;
+
   axios
     .get(url)
     .then((response) => {
@@ -30,8 +31,18 @@ exports.getSearchResultsFromAPI = async (req, res, next) => {
       }
       res.status(200).json(toReturn);
     })
-    .catch((error) => {
-      console.log(error);
+    .catch((err) => {
+      if (!err.statusCode) {
+        return res.status(500).json({
+          message: msg.SERVER_ERROR,
+        });
+      } else {
+        console.log(
+          "movieDBController/getSearchResultsFromAPI?statusCode=" +
+            err.statusCode
+        );
+      }
+      next(err);
     });
 };
 
@@ -41,7 +52,7 @@ exports.getSearchResultsFromAPI = async (req, res, next) => {
 exports.getInfoFromAPI = async (req, res, next) => {
   let infoToReturn;
 
-  await axios
+  const generalDetails = await axios
     .get(
       process.env.API_URL +
         "/movie/" +
@@ -98,15 +109,25 @@ exports.getInfoFromAPI = async (req, res, next) => {
         casting: actors,
       };
     })
-    .catch((error) => {
-      console.log(error);
+    .catch((err) => {
+      if (!err.statusCode) {
+        return res.status(500).json({
+          message: msg.SERVER_ERROR,
+        });
+      } else {
+        console.log(
+          "movieDBController/getInfoFromAPI?statusCode-general-details=" +
+            err.statusCode
+        );
+      }
+      next(err);
     });
 
   //Add information of the other languages
-  let langList = process.env.LANGUAGES;
+  let langList = JSON.parse(process.env.LANGUAGES);
 
   for (let index = 0; index < langList.length; index++) {
-    await axios
+    const localInfo = await axios
       .get(
         process.env.API_URL +
           "/movie/" +
@@ -116,8 +137,8 @@ exports.getInfoFromAPI = async (req, res, next) => {
           "&language=" +
           langList[index]
       )
-      .then((response) => {
-        fullMovieData = response.data;
+      .then(async (response) => {
+        fullMovieData = await response.data;
         infoToReturn[langList[index]] = {
           title: fullMovieData["title"],
           overview: fullMovieData["overview"],
@@ -125,10 +146,20 @@ exports.getInfoFromAPI = async (req, res, next) => {
         };
       })
       .catch((err) => {
-        console.log(err);
+        if (!err.statusCode) {
+          return res.status(500).json({
+            message: msg.SERVER_ERROR,
+          });
+        } else {
+          console.log(
+            "movieDBController/getInfoFromAPI?statusCode-local-details=" +
+              err.statusCode
+          );
+        }
+        next(err);
       });
 
-    await axios
+    const trailers = await axios
       .get(
         process.env.API_URL +
           "/movie/" +
@@ -138,8 +169,8 @@ exports.getInfoFromAPI = async (req, res, next) => {
           "&language=" +
           langList[index]
       )
-      .then((response) => {
-        videos = response.data.results;
+      .then(async (response) => {
+        videos = await response.data.results;
         let movieTrailers = [];
         videos.forEach((video) => {
           if (
@@ -154,7 +185,21 @@ exports.getInfoFromAPI = async (req, res, next) => {
           }
         });
         infoToReturn[langList[index]].trailers = movieTrailers;
+      })
+      .catch((err) => {
+        if (!err.statusCode) {
+          return res.status(500).json({
+            message: msg.SERVER_ERROR,
+          });
+        } else {
+          console.log(
+            "movieDBController/getInfoFromAPI?statusCode-trailers=" +
+              err.statusCode
+          );
+        }
+        next(err);
       });
   }
+
   res.status(200).json(infoToReturn);
 };
