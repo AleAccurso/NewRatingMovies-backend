@@ -62,7 +62,7 @@ exports.login = async (req, res, next) => {
       { email: loadedUser.email },
       process.env.JWT_SECRET,
       {
-        expiresIn: "3600s",
+        expiresIn: "24h",
       }
     );
     res.status(200).json({ token: token, language: loadedUser.language });
