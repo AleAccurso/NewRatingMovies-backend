@@ -172,11 +172,8 @@ exports.deleteMovie = async (req, res, next) => {
             }
           }
           //Rates
-          console.log("rates:", user.myRates);
-          console.log("movie to remove:", movie.movieDbId);
           for (let i = 0; i < user.myRates.length; i++) {
             if (user.myRates[i].movieDbId == movie.movieDbId) {
-              console.log("in");
               user.myRates.splice(i, 1);
             }
           }
