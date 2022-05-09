@@ -30,4 +30,5 @@ app.use("/api/the-movie-db/", theMovideDBRouter);
 app.use(serverErrorManager);
 
 // Connect to db and run server
+app.keepAliveTimeout = 1 * 60 * 1000;
 server.Initialise(app);
