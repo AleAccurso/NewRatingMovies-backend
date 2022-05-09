@@ -11,6 +11,7 @@ const bodyParser = require("body-parser");
 const httpHeaders = require("./config/httpHeaders");
 
 // routes
+const defaultRouter = require("./routes/defaultRouter");
 const authRouter = require("./routes/authRouter");
 const userRouter = require("./routes/userRouter");
 const movieRouter = require("./routes/movieRouter");
@@ -22,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(httpHeaders);
 
 // Routes
+app.use("/api", defaultRouter);
 app.use("/api/auth/", authRouter);
 app.use("/api/movies/", movieRouter);
 app.use("/api/users/", userRouter);
