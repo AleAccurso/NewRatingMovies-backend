@@ -12,7 +12,7 @@ exports.Initialise = async (app) => {
         console.log("Server started.");
 
         const opts = {
-          interval: 29,
+          interval: 1,
           logging: false,
           stopTimes: { start: "00:00", end: "06:00" },
         };
