@@ -1,32 +1,35 @@
 {
-  "name": "newratingmovies-backend",
-  "version": "1.0.0",
-  "description": "NewRatingMovies - backend",
-  "author": "SignMedici",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "dev": "nodemon app.js"
-  },
-  "dependencies": {
-    "@google-cloud/storage": "^5.18.2",
-    "axios": "^0.21.4",
-    "bcrypt": "^5.0.1",
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.19.0",
-    "child_process": "^1.0.2",
-    "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "heroku-keep-awake": "^1.1.2",
-    "jsonwebtoken": "^8.5.1",
-    "jwt-decode": "^3.1.2",
-    "mongoose": "^6.0.5",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.4",
-    "nodemon": "^2.0.12",
-    "request": "^2.88.2"
-  }
+    "name": "newratingmovies-backend",
+    "version": "1.0.0",
+    "description": "NewRatingMovies - backend",
+    "author": "AleAccurso",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node dist/app.js",
+        "dev": "nodemon app.js"
+    },
+    "dependencies": {
+        "@google-cloud/storage": "^5.18.2",
+        "axios": "^0.21.4",
+        "bcrypt": "^5.0.1",
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^1.19.0",
+        "child_process": "^1.0.2",
+        "cors": "^2.8.5",
+        "crypto": "^1.0.1",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "jsonwebtoken": "^8.5.1",
+        "jwt-decode": "^3.1.2",
+        "mongoose": "^6.0.5",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.4",
+        "nodemon": "^2.0.12",
+        "request": "^2.88.2"
+    },
+    "devDependencies": {
+        "@types/express": "^4.17.13",
+        "@types/node": "^18.0.0"
+    }
 }
