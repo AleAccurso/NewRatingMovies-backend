@@ -40,3 +40,6 @@ google-credentials.json
 
 # vscode
 .vscode/
+
+#package-lock
+package-lock.json
