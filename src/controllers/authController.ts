@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { hash, compare } from "bcryptjs";
 
-import UserSchema from "../models/userModel";
+import { User } from "../models/userModel";
 import { sign } from "jsonwebtoken";
 
 import { authMsg, msg } from "../contants/responseMessages";
@@ -9,7 +9,7 @@ import { authMsg, msg } from "../contants/responseMessages";
 export const register: RequestHandler = async (req, res, next) => {
   const { name, email, password, language } = req.body;
   try {
-    const existUser = await UserSchema.findOne({ email: email }).exec();
+    const existUser = await User.findOne({ email: email }).exec();
     if (existUser) {
       return res.status(409).json({
         message: msg.RESOURCE_EXISTS + "email",
@@ -17,7 +17,7 @@ export const register: RequestHandler = async (req, res, next) => {
     }
 
     const hashedPassword = await hash(password, 12);
-    const user = new UserSchema({
+    const user = new User({
       nickname: name,
       email: email,
       password: hashedPassword,
@@ -38,17 +38,17 @@ export const register: RequestHandler = async (req, res, next) => {
   }
 };
 
-let loadedUser;
+let loadedUser: User;
 
 export const login: RequestHandler = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const user = await userModel.findOne({ email: email }).exec();
+    const user = await User.findOne({ email: email }).exec();
 
     if (!user) {
       return res.status(401).json({
-        message: msg.RESOURCE_NOT_FOUND +jwt "user",
+        message: msg.RESOURCE_NOT_FOUND + "user",
       });
     }
     loadedUser = user;
@@ -68,7 +68,7 @@ export const login: RequestHandler = async (req, res, next) => {
       }
     );
     res.status(200).json({ token: token, language: loadedUser.language });
-  } catch (err) {
+  } catch (err: Error) {
     if (!err.statusCode) {
       return res.status(500).json({
         message: msg.SERVER_ERROR,
@@ -80,7 +80,8 @@ export const login: RequestHandler = async (req, res, next) => {
 
 export const logout: RequestHandler = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.get("Authorization");
+
     sign(authHeader, "", { expiresIn: 1 }, (logout, err) => {
       if (authHeader) {
         res.status(200).send({ msg: msg.SUCCESS_ACTION + "logout" });

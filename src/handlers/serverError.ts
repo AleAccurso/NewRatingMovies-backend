@@ -6,7 +6,7 @@ interface Error {
     data?: object;
 }
 
-module.exports = async (
+export const serverErrorManager = async (
     error: Error,
     req: Request,
     res: Response,

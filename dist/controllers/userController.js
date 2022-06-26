@@ -3,12 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateFavorite = exports.getFavorites = exports.userRate = exports.deleteUser = exports.updateUser = exports.getUserById = exports.getUsers = void 0;
-const userModel_1 = __importDefault(require("../models/userModel"));
-const movieModel_1 = __importDefault(require("../models/movieModel"));
+exports.updateUserFavorite = exports.getUserFavorites = exports.updateUserRate = exports.deleteUserById = exports.updateUserById = exports.getUserById = exports.getUsers = void 0;
+const userModel_1 = require("../models/userModel");
+const movieModel_1 = require("../models/movieModel");
+const responseMessages_1 = require("../contants/responseMessages");
 const userPicController_1 = require("./userPicController");
-const util = require("util");
-const { authMsg, msg } = require("../constants/response_messages");
+const util_1 = __importDefault(require("util"));
 //Update user - To manage formData
 const Multer = require("multer");
 const upload = Multer({
@@ -18,15 +18,15 @@ const upload = Multer({
     },
 }).single("avatar");
 const getUsers = async (req, res, next) => {
-    pageInt = parseInt(req.query.page);
-    sizeInt = parseInt(req.query.size);
-    const user = userModel_1.default
+    const pageInt = parseInt(req.query.page);
+    const sizeInt = parseInt(req.query.size);
+    const user = userModel_1.User
         .find()
         .skip(pageInt * sizeInt)
         .limit(sizeInt)
         .exec((err, users) => {
         if (err) {
-            res.status(500).send({ message: msg.SERVER_ERROR });
+            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
         }
         else if (users) {
             res.status(200).json(users);
@@ -36,13 +36,13 @@ const getUsers = async (req, res, next) => {
 exports.getUsers = getUsers;
 //Get a user
 const getUserById = async (req, res, next) => {
-    let userId = req.userId;
+    let userId = req.params.userId;
     let userRole = req.userRole;
     if (userRole || userId == req.params.id) {
-        const user = userModel_1.default.findOne({ _id: req.params.id }, (err, user) => {
+        const user = userModel_1.User.findOne({ _id: req.params.id }, (err, user) => {
             if (err) {
                 res.status(404).send({
-                    message: msg.RESOURCE_NOT_FOUND + "user",
+                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + "user",
                 });
             }
             else if (user) {
@@ -51,12 +51,12 @@ const getUserById = async (req, res, next) => {
         });
     }
     else {
-        res.status(403).send({ message: authMsg.UNAUTHORIZED });
+        res.status(403).send({ message: responseMessages_1.authMsg.UNAUTHORIZED });
     }
 };
 exports.getUserById = getUserById;
 //update a user
-const updateUser = async (req, res, next) => {
+const updateUserById = async (req, res, next) => {
     let fileToUpload = req.file;
     let body = req.body;
     let userId = req.userId;
@@ -73,19 +73,19 @@ const updateUser = async (req, res, next) => {
             body.profilePic = newfilename + "." + ext;
             // Send file to Google Cloud Storage
             try {
-                await util.promisify(upload);
+                await util_1.default.promisify(upload);
                 const uploaded = await (0, userPicController_1.uploadPic)(req, res);
             }
             catch (error) {
-                res.status(500).send({ message: err.message });
+                res.status(500).send({ message: error.message });
             }
         }
         // Manage text field of the update request
-        userModel_1.default.findOneAndUpdate({ _id: req.params.id }, {
+        userModel_1.User.findOneAndUpdate({ _id: req.params.id }, {
             ...body,
         }, (err) => {
             if (err) {
-                res.status(500).send({ message: msg.SERVER_ERROR });
+                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
             }
             else {
                 res.status(200).json(req.body);
@@ -93,29 +93,29 @@ const updateUser = async (req, res, next) => {
         });
     }
     else {
-        res.status(403).send({ message: authMsg.UNAUTHORIZED });
+        res.status(403).send({ message: responseMessages_1.authMsg.UNAUTHORIZED });
     }
 };
-exports.updateUser = updateUser;
+exports.updateUserById = updateUserById;
 //Delete a user
-const deleteUser = async (req, res, next) => {
+const deleteUserById = async (req, res, next) => {
     let userId = req.userId;
     let userRole = req.userRole;
     if (userRole || userId == req.params.id) {
-        const user = userModel_1.default.findOne({ _id: req.params.id }, (err, user) => {
+        const user = userModel_1.User.findOne({ _id: req.params.id }, (err, user) => {
             if (err) {
                 res.status(404).send({
-                    message: msg.RESOURCE_NOT_FOUND + "user",
+                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + "user",
                 });
             }
             else if (user) {
-                userModel_1.default.deleteOne({ _id: req.params.id }, (err) => {
+                userModel_1.User.deleteOne({ _id: req.params.id }, (err) => {
                     if (err) {
-                        res.status(500).send({ message: msg.SERVER_ERROR });
+                        res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
                     }
                     else {
                         res.status(200).json({
-                            message: msg.SUCCESS_ACTION + "delete_user",
+                            message: responseMessages_1.msg.SUCCESS_ACTION + "delete_user",
                         });
                     }
                 });
@@ -123,15 +123,15 @@ const deleteUser = async (req, res, next) => {
         });
     }
     else {
-        res.status(403).send({ message: authMsg.UNAUTHORIZED });
+        res.status(403).send({ message: responseMessages_1.authMsg.UNAUTHORIZED });
     }
 };
-exports.deleteUser = deleteUser;
+exports.deleteUserById = deleteUserById;
 // Add, modify & remove a rate
-const userRate = async (req, res, next) => {
-    const user = userModel_1.default.findOne({ _id: req.params.id }, (err, user) => {
+const updateUserRate = async (req, res, next) => {
+    const user = userModel_1.User.findOne({ _id: req.params.id }, (err, user) => {
         if (err) {
-            res.status(500).send({ message: msg.SERVER_ERROR });
+            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
         }
         else if (user) {
             let userChanged = false;
@@ -166,15 +166,15 @@ const userRate = async (req, res, next) => {
         }
     });
 };
-exports.userRate = userRate;
+exports.updateUserRate = updateUserRate;
 // Get info of favorite movies
-const getFavorites = async (req, res, next) => {
-    pageInt = parseInt(req.query.page);
-    sizeInt = parseInt(req.query.size);
-    const user = await userModel_1.default.findOne({ _id: req.params.id }).exec();
+const getUserFavorites = async (req, res, next) => {
+    const pageInt = parseInt(req.query.page);
+    const sizeInt = parseInt(req.query.size);
+    let user = await userModel_1.User.findOne({ _id: req.params.id }).exec();
     let movies = [];
     await Promise.all(user.myFavorites.map(async (id) => {
-        await movieModel_1.default.findOne({ movieDbId: id }).then((movieInfo) => {
+        await movieModel_1.Movie.findOne({ movieDbId: id }).then((movieInfo) => {
             if (movieInfo) {
                 movies.push(movieInfo);
             }
@@ -182,7 +182,7 @@ const getFavorites = async (req, res, next) => {
     }));
     let nbMovies = movies.length;
     movies = movies.slice(pageInt * sizeInt, sizeInt + pageInt * sizeInt);
-    toReturn = {
+    const toReturn = {
         nbFavorites: nbMovies,
         page: pageInt,
         perPage: sizeInt,
@@ -190,12 +190,12 @@ const getFavorites = async (req, res, next) => {
     };
     res.status(200).json(toReturn);
 };
-exports.getFavorites = getFavorites;
+exports.getUserFavorites = getUserFavorites;
 //Add & remove a favorite
-const updateFavorite = async (req, res, next) => {
-    const user = userModel_1.default.findOne({ _id: req.params.id }, (err, user) => {
+const updateUserFavorite = async (req, res, next) => {
+    const user = userModel_1.User.findOne({ _id: req.params.id }, (err, user) => {
         if (err) {
-            res.status(500).send({ message: msg.SERVER_ERROR });
+            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
         }
         else if (user) {
             let index = user.myFavorites.indexOf(req.params.movieDbId);
@@ -210,4 +210,4 @@ const updateFavorite = async (req, res, next) => {
         }
     });
 };
-exports.updateFavorite = updateFavorite;
+exports.updateUserFavorite = updateUserFavorite;

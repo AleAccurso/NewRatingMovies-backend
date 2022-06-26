@@ -1,7 +1,7 @@
 import { RequestHandler } from "express"; 
 import jwt from "jsonwebtoken";
 import { authMsg } from "../contants/responseMessages";
-import userModel from "../models/userModel";
+import { User } from "../models/userModel";
 
 export const isAuth: RequestHandler = async (req, res, next) => {
   const authHeader = req.get("Authorization");
@@ -11,8 +11,10 @@ export const isAuth: RequestHandler = async (req, res, next) => {
       message: authMsg.NOT_AUTHENTICATED,
     });
   }
+
   const token = authHeader.split(" ")[1];
   let decodedToken;
+
   try {
     decodedToken = jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
@@ -20,12 +22,15 @@ export const isAuth: RequestHandler = async (req, res, next) => {
       message: `${err}`,
     });
   }
+
   if (!decodedToken) {
     return res.status(401).json({
       message: authMsg.NOT_AUTHENTICATED,
     });
   }
-  let user = await userModel.findOne({ email: decodedToken.email });
+
+  let user = await User.findOne({ email: decodedToken.email });
+  
   if (user) {
     req.userId = user._id;
     req.userRole = user.isAdmin;

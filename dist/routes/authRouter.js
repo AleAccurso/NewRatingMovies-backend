@@ -24,29 +24,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const userController = __importStar(require("../controllers/userController"));
-const isAuth_1 = require("../middelware/isAuth");
-const isAdmin_1 = require("../middelware/isAdmin");
+const authController = __importStar(require("../controllers/authController"));
 const router = (0, express_1.Router)();
-//Manage formData for the avatar/profilePic
-const Multer = require("multer");
-const upload = Multer({
-    storage: Multer.MemoryStorage,
-    limits: {
-        fileSize: 2 * 1024 * 1024, // Maximum file size is 2MB
-    },
-}).single("avatar");
-/*
-  User routes
-*/
-router.get("/", isAdmin_1.isAdmin, userController.getUsers); // Get all users
-router
-    .route("/:id")
-    .get(isAuth_1.isAuth, userController.getUserById) // Get a user
-    .post(isAuth_1.isAuth, upload, userController.updateUserById) // Update a user
-    .delete(isAdmin_1.isAdmin, userController.deleteUserById); // Delete a user
-router.patch("/:id/:movieDbId/:rate", isAuth_1.isAuth, userController.updateUserRate); //add, remove & delete rate
-router.get("/:id/favorites", isAuth_1.isAuth, userController.getUserFavorites); // Get userFavorites with movies information
-//add & remove a favorite
-router.post("/:id/favorites/:movieDbId", isAuth_1.isAuth, userController.updateUserFavorite);
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.delete("/logout", authController.logout);
+router.get("/user", authController.getUser);
 exports.default = router;

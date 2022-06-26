@@ -1,24 +1,21 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUser = exports.logout = exports.login = exports.register = void 0;
 const bcryptjs_1 = require("bcryptjs");
-const userModel_1 = __importDefault(require("../models/userModel"));
+const userModel_1 = require("../models/userModel");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const responseMessages_1 = require("../contants/responseMessages");
 const register = async (req, res, next) => {
     const { name, email, password, language } = req.body;
     try {
-        const existUser = await userModel_1.default.findOne({ email: email }).exec();
+        const existUser = await userModel_1.User.findOne({ email: email }).exec();
         if (existUser) {
             return res.status(409).json({
                 message: responseMessages_1.msg.RESOURCE_EXISTS + "email",
             });
         }
         const hashedPassword = await (0, bcryptjs_1.hash)(password, 12);
-        const user = new userModel_1.default({
+        const user = new userModel_1.User({
             nickname: name,
             email: email,
             password: hashedPassword,
@@ -44,10 +41,10 @@ let loadedUser;
 const login = async (req, res, next) => {
     const { email, password } = req.body;
     try {
-        const user = await userModel.findOne({ email: email }).exec();
+        const user = await userModel_1.User.findOne({ email: email }).exec();
         if (!user) {
             return res.status(401).json({
-                message: responseMessages_1.msg.RESOURCE_NOT_FOUND + jwt, "user": ,
+                message: responseMessages_1.msg.RESOURCE_NOT_FOUND + "user",
             });
         }
         loadedUser = user;
@@ -74,7 +71,7 @@ const login = async (req, res, next) => {
 exports.login = login;
 const logout = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
+        const authHeader = req.get("Authorization");
         (0, jsonwebtoken_1.sign)(authHeader, "", { expiresIn: 1 }, (logout, err) => {
             if (authHeader) {
                 res.status(200).send({ msg: responseMessages_1.msg.SUCCESS_ACTION + "logout" });

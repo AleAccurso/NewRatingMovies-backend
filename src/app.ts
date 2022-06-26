@@ -1,22 +1,24 @@
 import express from "express";
+import dotenv from 'dotenv';
 import { json, urlencoded } from "body-parser";
-
-require("dotenv").config();
-
-const app = express();
 
 import { Initialise } from "./database/database";
 
 // Manage HTTP requests
-const serverErrorManager = require("./handlers/serverErrors");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    const httpHeaders = require("./config/httpHeaders");
+import { serverErrorManager } from "./handlers/serverError";
+import { httpHeaders } from "./config/httpHeaders";
 
 // routes
 import userRouter from "./routes/userRouter";
+import authRouter from "./routes/authRouter";
+import movieRouter from "./routes/movieRouter";
+import theMovideDBRouter from "./routes/theMovideDBRouter";
 
-const authRouter = require("./routes/authRouter");
-const movieRouter = require("./routes/movieRouter");
-const theMovideDBRouter = require("./routes/theMovideDBRouter");
+// Create app
+const app = express();
+
+// Make env variable available
+dotenv.config()
 
 // HTTP requests setup
 app.use(json);

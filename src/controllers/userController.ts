@@ -1,12 +1,12 @@
 import { RequestHandler } from "express";
 
-import userModel from "../models/userModel";
-import movieModel from "../models/movieModel";
+import { User } from "../models/userModel"
+import { Movie } from "../models/movieModel";
 
+import { authMsg, msg } from "../contants/responseMessages";
 import { removeOldPic, uploadPic } from "./userPicController";
 
-const util = require("util");
-const { authMsg, msg } = require("../constants/response_messages");
+import util from "util";
 
 //Update user - To manage formData
 const Multer = require("multer");
@@ -18,10 +18,11 @@ const upload = Multer({
 }).single("avatar");
 
 export const getUsers: RequestHandler = async (req, res, next) => {
-    pageInt = parseInt(req.query.page);
-    sizeInt = parseInt(req.query.size);
 
-    const user = userModel
+    const pageInt: number = parseInt(req.query.page as string);
+    const sizeInt: number = parseInt(req.query.size as string);
+
+    const user = User
         .find()
         .skip(pageInt * sizeInt)
         .limit(sizeInt)
@@ -36,11 +37,11 @@ export const getUsers: RequestHandler = async (req, res, next) => {
 
 //Get a user
 export const getUserById: RequestHandler = async (req, res, next) => {
-    let userId = req.userId;
+    let userId = req.params.userId;
     let userRole = req.userRole;
 
     if (userRole || userId == req.params.id) {
-        const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
+        const user = User.findOne({ _id: req.params.id }, (err: Error, user: User) => {
             if (err) {
                 res.status(404).send({
                     message: msg.RESOURCE_NOT_FOUND + "user",
@@ -55,7 +56,7 @@ export const getUserById: RequestHandler = async (req, res, next) => {
 };
 
 //update a user
-export const updateUser: RequestHandler = async (req, res, next) => {
+export const updateUserById: RequestHandler = async (req, res, next) => {
     let fileToUpload = req.file;
     let body = req.body;
 
@@ -78,13 +79,13 @@ export const updateUser: RequestHandler = async (req, res, next) => {
             try {
                 await util.promisify(upload);
                 const uploaded = await uploadPic(req, res);
-            } catch (error) {
-                res.status(500).send({ message: err.message });
+            } catch (error: Error) {
+                res.status(500).send({ message: error.message });
             }
         }
 
         // Manage text field of the update request
-        userModel.findOneAndUpdate(
+        User.findOneAndUpdate(
             { _id: req.params.id },
             {
                 ...body,
@@ -103,18 +104,18 @@ export const updateUser: RequestHandler = async (req, res, next) => {
 };
 
 //Delete a user
-export const deleteUser: RequestHandler = async (req, res, next) => {
+export const deleteUserById: RequestHandler = async (req, res, next) => {
     let userId = req.userId;
     let userRole = req.userRole;
 
     if (userRole || userId == req.params.id) {
-        const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
+        const user = User.findOne({ _id: req.params.id }, (err: Error, user: User) => {
             if (err) {
                 res.status(404).send({
                     message: msg.RESOURCE_NOT_FOUND + "user",
                 });
             } else if (user) {
-                userModel.deleteOne({ _id: req.params.id }, (err) => {
+                User.deleteOne({ _id: req.params.id }, (err) => {
                     if (err) {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     } else {
@@ -131,8 +132,8 @@ export const deleteUser: RequestHandler = async (req, res, next) => {
 };
 
 // Add, modify & remove a rate
-export const userRate: RequestHandler = async (req, res, next) => {
-    const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
+export const updateUserRate: RequestHandler = async (req, res, next) => {
+    const user = User.findOne({ _id: req.params.id }, (err: Error, user: User) => {
         if (err) {
             res.status(500).send({ message: msg.SERVER_ERROR });
         } else if (user) {
@@ -173,17 +174,18 @@ export const userRate: RequestHandler = async (req, res, next) => {
 };
 
 // Get info of favorite movies
-export const getFavorites: RequestHandler = async (req, res, next) => {
-    pageInt = parseInt(req.query.page);
-    sizeInt = parseInt(req.query.size);
+export const getUserFavorites: RequestHandler = async (req, res, next) => {
+    
+    const pageInt: number = parseInt(req.query.page as string);
+    const sizeInt: number = parseInt(req.query.size as string);
 
-    const user = await userModel.findOne({ _id: req.params.id }).exec();
+    let user = await User.findOne({ _id: req.params.id }).exec();
 
-    let movies = [];
+    let movies: Movie[] = [];
 
     await Promise.all(
         user.myFavorites.map(async (id) => {
-            await movieModel.findOne({ movieDbId: id }).then((movieInfo) => {
+            await Movie.findOne({ movieDbId: id }).then((movieInfo: Movie) => {
                 if (movieInfo) {
                     movies.push(movieInfo);
                 }
@@ -195,7 +197,7 @@ export const getFavorites: RequestHandler = async (req, res, next) => {
 
     movies = movies.slice(pageInt * sizeInt, sizeInt + pageInt * sizeInt);
 
-    toReturn = {
+    const toReturn = {
         nbFavorites: nbMovies,
         page: pageInt,
         perPage: sizeInt,
@@ -206,8 +208,8 @@ export const getFavorites: RequestHandler = async (req, res, next) => {
 };
 
 //Add & remove a favorite
-export const updateFavorite: RequestHandler = async (req, res, next) => {
-    const user = userModel.findOne({ _id: req.params.id }, (err, user) => {
+export const updateUserFavorite: RequestHandler = async (req, res, next) => {
+    const user = User.findOne({ _id: req.params.id }, (err: Error, user: User) => {
         if (err) {
             res.status(500).send({ message: msg.SERVER_ERROR });
         } else if (user) {

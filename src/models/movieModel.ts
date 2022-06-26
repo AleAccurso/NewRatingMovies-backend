@@ -1,4 +1,6 @@
-import { Schema } from "mongoose";
+import { Schema, model } from "mongoose";
+import IMovie from "../interfaces/movie";
+import localMovieInfo from "./subSchema/localMovieInfo"
 
 const MovieSchema = new Schema(
     {
@@ -9,32 +11,12 @@ const MovieSchema = new Schema(
         vote_average: { type: Number, required: true },
         vote_count: { type: Number, required: true },
         genre: { type: Array, required: true },
-        en: {
-            title: { type: String, required: true },
-            overview: { type: String, required: true },
-            poster_path: { type: String, required: true },
-            trailers: { type: Array, required: true },
-        },
-        fr: {
-            title: { type: String, required: true },
-            overview: { type: String, required: true },
-            poster_path: { type: String, required: true },
-            trailers: { type: Array, required: true },
-        },
-        nl: {
-            title: { type: String, required: true },
-            overview: { type: String, required: true },
-            poster_path: { type: String, required: true },
-            trailers: { type: Array, required: true },
-        },
-        it: {
-            title: { type: String, required: true },
-            overview: { type: String, required: true },
-            poster_path: { type: String, required: true },
-            trailers: { type: Array, required: true },
-        },
+        en: {type: localMovieInfo, required: true },
+        fr: {type: localMovieInfo, required: true },
+        nl: {type: localMovieInfo, required: true },
+        it: {type: localMovieInfo, required: true },
     },
     { timestamps: true }
 );
 
-export default MovieSchema;
+export const Movie = model<IMovie>('Movie', MovieSchema);
