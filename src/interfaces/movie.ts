@@ -8,7 +8,7 @@ type localMovieInfo = {
 }
 
 export default interface IMovie extends Document {
-    movieDbId: string,
+    movieDbId: number,
     release_date: string,
     director: string,
     casting: string,

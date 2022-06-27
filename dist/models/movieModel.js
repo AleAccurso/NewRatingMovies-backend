@@ -7,7 +7,7 @@ exports.Movie = void 0;
 const mongoose_1 = require("mongoose");
 const localMovieInfo_1 = __importDefault(require("./subSchema/localMovieInfo"));
 const MovieSchema = new mongoose_1.Schema({
-    movieDbId: { type: String, required: true, unique: true },
+    movieDbId: { type: Number, required: true, unique: true },
     release_date: { type: String, required: true },
     director: { type: String, required: true },
     casting: { type: String, required: true },

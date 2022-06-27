@@ -4,11 +4,14 @@ import dotenv from 'dotenv';
 import { Movie } from '../models/movieModel';
 import { User } from '../models/userModel';
 
+import { MongoError } from 'mongodb';
 import { msg } from '../contants/responseMessages';
 
 import console from "console"
 
 import { exec } from 'child_process';
+import IMovie from '../interfaces/movie';
+import IUser from '../interfaces/user';
 
 dotenv.config();
 
@@ -31,7 +34,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
             const movies = Movie.find()
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
-                .exec((err, movies: Movie[]]) => {
+                .exec((err, movies: IMovie[]) => {
                     if (err) {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     } else if (movies) {
@@ -40,7 +43,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                     }
                 });
         } else if (data == 'admin') {
-            const movies: Movie[] = Movie.find()
+            const movies: IMovie[] = Movie.find()
                 .select({
                     release_date: 1,
                     vote_average: 1,
@@ -64,7 +67,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                 })
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
-                .exec((err: Error, movies: Movie[]) => {
+                .exec((err: Error, movies: IMovie[]) => {
                     if (err) {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     } else if (movies) {
@@ -97,7 +100,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                 })
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
-                .exec((err: Error, movies: Movie[]) => {
+                .exec((err: Error, movies: IMovie[]) => {
                     if (err) {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     } else if (movies) {
@@ -130,7 +133,7 @@ export const addMovie: RequestHandler = async (req, res, next) => {
 
 //Get movie by its id
 export const getMovieById: RequestHandler = async (req, res, next) => {
-    const movies = Movie.findOne({ _id: req.params.id }, (err: Error, movie: Movie) => {
+    const movies = Movie.findOne({ _id: req.params.id }, (err: Error, movie: IMovie) => {
         if (err) {
             res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + 'movie' });
         } else if (movies) {
@@ -159,14 +162,14 @@ export const updateMovieById: RequestHandler = async (req, res, next) => {
 //Delete movie from DB
 export const deleteMovieById: RequestHandler = async (req, res, next) => {
     idToRemove = req.params.id;
-    const movies = Movie.findOne({ _id: idToRemove }, (err: Error, movie: Movie) => {
+    const movies = Movie.findOne({ _id: idToRemove }, (err: Error, movie: IMovie) => {
         if (err) {
             res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + 'movie' });
         } else if (movie) {
             // Remove movie if movie in favorite and/or rate of a user
             User.find()
                 .cursor()
-                .eachAsync((user) => {
+                .eachAsync((user: IUser) => {
                     // Favorites
                     if (user.myFavorites.includes(movie.movieDbId)) {
                         const index = user.myFavorites.indexOf(movie.movieDbId);
@@ -240,7 +243,7 @@ export const updateMetaData: RequestHandler = async (req, res, next) => {
 export const isInDB: RequestHandler = async (req, res, next) => {
     const movies = Movie.findOne(
         { movieDbId: req.params.movieDBId },
-        (err: Error, movie: Movie) => {
+        (err: Error, movie: IMovie) => {
             if (err) {
                 res.status(404).send({
                     message: msg.RESOURCE_NOT_FOUND + 'movie',

@@ -10,18 +10,17 @@ const responseMessages_1 = require("../contants/responseMessages");
 const userPicController_1 = require("./userPicController");
 const util_1 = __importDefault(require("util"));
 //Update user - To manage formData
-const Multer = require("multer");
+const Multer = require('multer');
 const upload = Multer({
     storage: Multer.MemoryStorage,
     limits: {
         fileSize: 2 * 1024 * 1024, // Maximum file size is 2MB
     },
-}).single("avatar");
+}).single('avatar');
 const getUsers = async (req, res, next) => {
     const pageInt = parseInt(req.query.page);
     const sizeInt = parseInt(req.query.size);
-    const user = userModel_1.User
-        .find()
+    const user = userModel_1.User.find()
         .skip(pageInt * sizeInt)
         .limit(sizeInt)
         .exec((err, users) => {
@@ -42,7 +41,7 @@ const getUserById = async (req, res, next) => {
         const user = userModel_1.User.findOne({ _id: req.params.id }, (err, user) => {
             if (err) {
                 res.status(404).send({
-                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + "user",
+                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'user',
                 });
             }
             else if (user) {
@@ -68,9 +67,9 @@ const updateUserById = async (req, res, next) => {
             const remove = await (0, userPicController_1.removeOldPic)(req.params.id);
             // Get a new filename for the file
             let newfilename = Math.round(new Date().getTime());
-            let ext = req.file.mimetype.split("/")[1];
-            req.file.originalname = newfilename + "." + ext;
-            body.profilePic = newfilename + "." + ext;
+            let ext = req.file.mimetype.split('/')[1];
+            req.file.originalname = newfilename + '.' + ext;
+            body.profilePic = newfilename + '.' + ext;
             // Send file to Google Cloud Storage
             try {
                 await util_1.default.promisify(upload);
@@ -105,7 +104,7 @@ const deleteUserById = async (req, res, next) => {
         const user = userModel_1.User.findOne({ _id: req.params.id }, (err, user) => {
             if (err) {
                 res.status(404).send({
-                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + "user",
+                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'user',
                 });
             }
             else if (user) {
@@ -115,7 +114,7 @@ const deleteUserById = async (req, res, next) => {
                     }
                     else {
                         res.status(200).json({
-                            message: responseMessages_1.msg.SUCCESS_ACTION + "delete_user",
+                            message: responseMessages_1.msg.SUCCESS_ACTION + 'delete_user',
                         });
                     }
                 });

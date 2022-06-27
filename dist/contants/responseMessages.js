@@ -14,4 +14,5 @@ exports.msg = {
     SUCCESS_ACTION: "successfull/action=",
     BAD_DATA: "bad-data/resource=",
     BAD_PARAMS: "bad-params/param=",
+    DB_ERROR: "db-error"
 };

@@ -29,5 +29,5 @@ const router = (0, express_1.Router)();
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.delete("/logout", authController.logout);
-router.get("/user", authController.getUser);
+router.get("/user", authController.getLoggedUser);
 exports.default = router;

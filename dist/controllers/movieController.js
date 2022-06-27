@@ -25,98 +25,95 @@ const getMovies = async (req, res, next) => {
             const movies = movieModel_1.Movie.find()
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
-                .exec((err, movies), movieModel_1.Movie[]);
+                .exec((err, movies) => {
+                if (err) {
+                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+                }
+                else if (movies) {
+                    dataToSend['movies'] = movies;
+                    res.status(200).json(dataToSend);
+                }
+            });
         }
+        else if (data == 'admin') {
+            const movies = movieModel_1.Movie.find()
+                .select({
+                release_date: 1,
+                vote_average: 1,
+                director: 1,
+                en: {
+                    title: 1,
+                    overview: 1,
+                },
+                fr: {
+                    title: 1,
+                    overview: 1,
+                },
+                it: {
+                    title: 1,
+                    overview: 1,
+                },
+                nl: {
+                    title: 1,
+                    overview: 1,
+                },
+            })
+                .skip(pageInt * sizeInt)
+                .limit(sizeInt)
+                .exec((err, movies) => {
+                if (err) {
+                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+                }
+                else if (movies) {
+                    dataToSend['movies'] = movies;
+                    res.status(200).json(dataToSend);
+                }
+            });
+        }
+        else if (data == 'min') {
+            const movies = movieModel_1.Movie.find()
+                .select({
+                _id: 1,
+                movieDbId: 1,
+                release_date: 1,
+                en: {
+                    title: 1,
+                    poster_path: 1,
+                },
+                fr: {
+                    title: 1,
+                    poster_path: 1,
+                },
+                it: {
+                    title: 1,
+                    poster_path: 1,
+                },
+                nl: {
+                    title: 1,
+                    poster_path: 1,
+                },
+            })
+                .skip(pageInt * sizeInt)
+                .limit(sizeInt)
+                .exec((err, movies) => {
+                if (err) {
+                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+                }
+                else if (movies) {
+                    dataToSend['movies'] = movies;
+                    res.status(200).json(dataToSend);
+                }
+            });
+        }
+        else {
+            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'data' });
+        }
+    }
+    else {
+        res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'page_size' });
     }
 };
 exports.getMovies = getMovies;
-{
-    if (err) {
-        res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-    }
-    else if (movies) {
-        dataToSend['movies'] = movies;
-        res.status(200).json(dataToSend);
-    }
-}
-;
-if (data == 'admin') {
-    const movies = movieModel_1.Movie.find()
-        .select({
-        release_date: 1,
-        vote_average: 1,
-        director: 1,
-        en: {
-            title: 1,
-            overview: 1,
-        },
-        fr: {
-            title: 1,
-            overview: 1,
-        },
-        it: {
-            title: 1,
-            overview: 1,
-        },
-        nl: {
-            title: 1,
-            overview: 1,
-        },
-    })
-        .skip(pageInt * sizeInt)
-        .limit(sizeInt)
-        .exec((err, movies) => {
-        if (err) {
-            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-        }
-        else if (movies) {
-            dataToSend['movies'] = movies;
-            res.status(200).json(dataToSend);
-        }
-    });
-}
-else if (data == 'min') {
-    const movies = movieModel_1.Movie.find()
-        .select({
-        _id: 1,
-        movieDbId: 1,
-        release_date: 1,
-        en: {
-            title: 1,
-            poster_path: 1,
-        },
-        fr: {
-            title: 1,
-            poster_path: 1,
-        },
-        it: {
-            title: 1,
-            poster_path: 1,
-        },
-        nl: {
-            title: 1,
-            poster_path: 1,
-        },
-    })
-        .skip(pageInt * sizeInt)
-        .limit(sizeInt)
-        .exec((err, movies) => {
-        if (err) {
-            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-        }
-        else if (movies) {
-            dataToSend['movies'] = movies;
-            res.status(200).json(dataToSend);
-        }
-    });
-}
-else {
-    res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'data' });
-}
-{
-    res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'page_size' });
-}
-;
 //Add a movie
 const addMovie = async (req, res, next) => {
     let movie = new movieModel_1.Movie({

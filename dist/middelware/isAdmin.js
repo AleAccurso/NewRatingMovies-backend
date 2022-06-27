@@ -18,6 +18,11 @@ const isAdmin = async (req, res, next) => {
         const token = authHeader.split(' ')[1];
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         let user = await userModel_1.User.findOne({ email: decoded.email });
+        if (!user) {
+            return res.status(401).json({
+                message: responseMessages_1.msg.RESOURCE_NOT_FOUND + "user",
+            });
+        }
         if (!user.isAdmin) {
             throw new Error();
         }

@@ -75,7 +75,8 @@ export const getInfoFromAPI: RequestHandler = async (req, res, next) => {
             });
 
             //Get all names of genre
-            let genres = [];
+            let genres = [] as string[];
+
             fullMovieData['genres'].forEach((genre) => {
                 genres.push(genre.name.replace(' ', '').toLowerCase());
             });

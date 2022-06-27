@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { authMsg } from '../contants/responseMessages';
+import { authMsg, msg } from '../contants/responseMessages';
 import { User } from '../models/userModel';
 
 export const isAdmin: RequestHandler = async (req, res, next) => {
@@ -18,6 +18,12 @@ export const isAdmin: RequestHandler = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         let user = await User.findOne({ email: decoded.email });
+
+        if (!user) {
+            return res.status(401).json({
+                message: msg.RESOURCE_NOT_FOUND + "user",
+            });
+        }
 
         if (!user.isAdmin) {
             throw new Error();

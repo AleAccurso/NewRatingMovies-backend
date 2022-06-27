@@ -4,7 +4,7 @@ import localMovieInfo from "./subSchema/localMovieInfo"
 
 const MovieSchema = new Schema(
     {
-        movieDbId: { type: String, required: true, unique: true },
+        movieDbId: { type: Number, required: true, unique: true },
         release_date: { type: String, required: true },
         director: { type: String, required: true },
         casting: { type: String, required: true },
