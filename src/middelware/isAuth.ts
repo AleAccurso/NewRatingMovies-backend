@@ -1,7 +1,8 @@
 import { RequestHandler } from "express"; 
 import jwt from "jsonwebtoken";
+import { ObjectId } from "mongoose";
 import { authMsg } from "../contants/responseMessages";
-import { User } from "../models/userModel";
+import { User } from "../schema/user";
 
 export const isAuth: RequestHandler = async (req, res, next) => {
   const authHeader = req.get("Authorization");
@@ -13,7 +14,7 @@ export const isAuth: RequestHandler = async (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1];
-  let decodedToken;
+  let decodedToken: string | jwt.JwtPayload;
 
   try {
     decodedToken = jwt.verify(token, process.env.JWT_SECRET);
@@ -29,11 +30,14 @@ export const isAuth: RequestHandler = async (req, res, next) => {
     });
   }
 
-  let user = await User.findOne({ email: decodedToken.email });
-  
-  if (user) {
-    req.userId = user._id;
-    req.userRole = user.isAdmin;
+  if (typeof decodedToken != "string"){
+    let user = await User.findOne({ email: decodedToken.email as string});
+    
+    if (user) {
+      req._userId = user._id;
+      req._userAdmin = user.isAdmin;
+    }
   }
+  
   next();
 };

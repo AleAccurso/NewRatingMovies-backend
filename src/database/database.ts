@@ -1,15 +1,14 @@
 import { ConnectOptions, connect } from 'mongoose';
-import { Application } from 'express';
 
-export const Initialise = async (app: Application) => {
+export const connectDB = async () => {
     await connect(process.env.MONGOOSE_URI, {
         useNewUrlParser: true,
+        useFindOneAndUpdate: true,
         useUnifiedTopology: true,
+        useCreateIndex: true,
     } as ConnectOptions)
         .then(() => {
-            app.listen(process.env.PORT, () => {
-                console.log('Server started.');
-            });
+                console.log('DB connected.');
         })
         .catch((err: Error) => console.log(err));
 };

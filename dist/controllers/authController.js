@@ -3,21 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLoggedUser = exports.logout = exports.login = exports.register = void 0;
 const bcryptjs_1 = require("bcryptjs");
 const mongodb_1 = require("mongodb");
-const userModel_1 = require("../models/userModel");
+const user_1 = require("../schema/user");
 const jsonwebtoken_1 = require("jsonwebtoken");
 const responseMessages_1 = require("../contants/responseMessages");
 const register = async (req, res, next) => {
-    const { name, email, password, language } = req.body;
+    const { nickname, email, password, language } = req.body;
     try {
-        const existUser = await userModel_1.User.findOne({ email: email }).exec();
+        const existUser = await user_1.User.findOne({ email: email }).exec();
         if (existUser) {
             return res.status(409).json({
                 message: responseMessages_1.msg.RESOURCE_EXISTS + 'email',
             });
         }
         const hashedPassword = await (0, bcryptjs_1.hash)(password, 12);
-        const user = new userModel_1.User({
-            nickname: name,
+        const user = new user_1.User({
+            nickname: nickname,
             email: email,
             password: hashedPassword,
             language: language,
@@ -46,7 +46,7 @@ let loadedUser;
 const login = async (req, res, next) => {
     const { email, password } = req.body;
     try {
-        const user = await userModel_1.User.findOne({ email: email }).exec();
+        const user = await user_1.User.findOne({ email: email }).exec();
         if (!user) {
             return res.status(401).json({
                 message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'user',

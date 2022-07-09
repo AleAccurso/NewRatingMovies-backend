@@ -3,14 +3,15 @@ import { hash, compare } from 'bcryptjs';
 
 import { MongoError } from 'mongodb';
 
-import { User } from '../models/userModel';
+import { User } from '../schema/user';
 import { sign } from 'jsonwebtoken';
 
 import { authMsg, msg } from '../contants/responseMessages';
-import IUser from '../interfaces/user';
+import IUser from '../models/user';
+import UserReqCreateDTO from '../dto/userReqCreateDTO';
 
 export const register: RequestHandler = async (req, res, next) => {
-    const { name, email, password, language } = req.body;
+    const { nickname, email, password, language } = req.body as UserReqCreateDTO;
 
     try {
         const existUser = await User.findOne({ email: email }).exec();
@@ -24,7 +25,7 @@ export const register: RequestHandler = async (req, res, next) => {
         const hashedPassword = await hash(password, 12);
 
         const user = new User({
-            nickname: name,
+            nickname: nickname,
             email: email,
             password: hashedPassword,
             language: language,
@@ -52,7 +53,7 @@ export const register: RequestHandler = async (req, res, next) => {
 let loadedUser: IUser;
 
 export const login: RequestHandler = async (req, res, next) => {
-    const { email, password } = req.body;
+    const { email, password }:IUser = req.body;
 
     try {
         const user = await User.findOne({ email: email }).exec();

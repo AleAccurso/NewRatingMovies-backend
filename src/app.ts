@@ -2,10 +2,10 @@ import express from "express";
 import dotenv from 'dotenv';
 import { json, urlencoded } from "body-parser";
 
-import { Initialise } from "./database/database";
+import { connectDB } from "./database/database"
 
 // Manage HTTP requests
-import { serverErrorManager } from "./handlers/serverError";
+import { ErrorHandler } from "./handlers/ErrorHandler";
 import { httpHeaders } from "./config/httpHeaders";
 
 // routes
@@ -14,24 +14,31 @@ import authRouter from "./routes/authRouter";
 import movieRouter from "./routes/movieRouter";
 import theMovideDBRouter from "./routes/theMovideDBRouter";
 
-// Create app
-const app = express();
+import { routerParamConverter } from "./middelware/routes";
+import { start } from "./server/server";
+
+// Create server
+const server = express();
+
+// connect DB
+connectDB()
 
 // Make env variable available
 dotenv.config()
 
 // HTTP requests setup
-app.use(json);
-app.use(urlencoded({ extended: false }));
-app.use(httpHeaders);
+server.use(json);
+server.use(urlencoded({ extended: false }));
+server.use(httpHeaders);
 
 // Routes
-app.use("/api/auth/", authRouter);
-app.use("/api/movies/", movieRouter);
-app.use("/api/users/", userRouter);
-app.use("/api/the-movie-db/", theMovideDBRouter);
+server.use("/api/auth/", authRouter);
+server.use("/api/movies/", movieRouter);
+server.use("/api/users/", userRouter);
+server.use("/api/the-movie-db/", theMovideDBRouter);
 
-app.use(serverErrorManager);
+server.use(routerParamConverter);
+server.use(ErrorHandler);
 
 // Connect to db and run server
-Initialise(app);
+start(server);

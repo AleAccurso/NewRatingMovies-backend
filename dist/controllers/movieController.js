@@ -5,38 +5,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isInDB = exports.updateMetaData = exports.deleteMovieById = exports.updateMovieById = exports.getMovieById = exports.addMovie = exports.getMovies = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
-const movieModel_1 = require("../models/movieModel");
-const userModel_1 = require("../models/userModel");
 const responseMessages_1 = require("../contants/responseMessages");
 const console_1 = __importDefault(require("console"));
 const child_process_1 = require("child_process");
+const movie_1 = require("../schema/movie");
+const user_1 = require("../schema/user");
 dotenv_1.default.config();
 //get movies
 const getMovies = async (req, res, next) => {
-    const pageInt = parseInt(req.query.page);
-    const sizeInt = parseInt(req.query.size);
+    var _a, _b;
+    const pageInt = parseInt((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.page);
+    const sizeInt = parseInt((_b = req === null || req === void 0 ? void 0 : req.query) === null || _b === void 0 ? void 0 : _b.size);
     const data = req.query.data;
-    const totalNbMovies = await movieModel_1.Movie.countDocuments({});
+    const totalNbMovies = await movie_1.Movie.countDocuments({});
     let dataToSend = {
         nbMovies: totalNbMovies,
     };
-    if (!isNaN(pageInt) && !isNaN(sizeInt)) {
+    if (pageInt && sizeInt) {
         if (data == 'full') {
-            const movies = movieModel_1.Movie.find()
+            const movies = movie_1.Movie.find()
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
                 .exec((err, movies) => {
-                if (err) {
-                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-                }
-                else if (movies) {
-                    dataToSend['movies'] = movies;
+                if (movies) {
+                    dataToSend.movies = movies;
                     res.status(200).json(dataToSend);
+                }
+                else {
+                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
                 }
             });
         }
         else if (data == 'admin') {
-            const movies = movieModel_1.Movie.find()
+            const movies = movie_1.Movie.find()
                 .select({
                 release_date: 1,
                 vote_average: 1,
@@ -61,17 +62,17 @@ const getMovies = async (req, res, next) => {
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
                 .exec((err, movies) => {
-                if (err) {
-                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-                }
-                else if (movies) {
-                    dataToSend['movies'] = movies;
+                if (movies) {
+                    dataToSend.movies = movies;
                     res.status(200).json(dataToSend);
+                }
+                else {
+                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
                 }
             });
         }
         else if (data == 'min') {
-            const movies = movieModel_1.Movie.find()
+            const movies = movie_1.Movie.find()
                 .select({
                 _id: 1,
                 movieDbId: 1,
@@ -100,7 +101,7 @@ const getMovies = async (req, res, next) => {
                     res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
                 }
                 else if (movies) {
-                    dataToSend['movies'] = movies;
+                    dataToSend.movies = movies;
                     res.status(200).json(dataToSend);
                 }
             });
@@ -116,7 +117,7 @@ const getMovies = async (req, res, next) => {
 exports.getMovies = getMovies;
 //Add a movie
 const addMovie = async (req, res, next) => {
-    let movie = new movieModel_1.Movie({
+    let movie = new movie_1.Movie({
         ...req.body,
     });
     movie
@@ -130,11 +131,11 @@ const addMovie = async (req, res, next) => {
 exports.addMovie = addMovie;
 //Get movie by its id
 const getMovieById = async (req, res, next) => {
-    const movies = movieModel_1.Movie.findOne({ _id: req.params.id }, (err, movie) => {
+    const movies = movie_1.Movie.findOne({ _id: req._id }, (err, movie) => {
         if (err) {
             res.status(404).send({ message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'movie' });
         }
-        else if (movies) {
+        else if (movie) {
             res.status(200).json(movie);
         }
     });
@@ -142,7 +143,7 @@ const getMovieById = async (req, res, next) => {
 exports.getMovieById = getMovieById;
 //Update a movie
 const updateMovieById = async (req, res, next) => {
-    const movie = movieModel_1.Movie.findOneAndUpdate({ _id: req.params.id }, {
+    const movie = movie_1.Movie.findOneAndUpdate({ _id: req._id }, {
         ...req.body,
     }, (err) => {
         if (err) {
@@ -156,14 +157,13 @@ const updateMovieById = async (req, res, next) => {
 exports.updateMovieById = updateMovieById;
 //Delete movie from DB
 const deleteMovieById = async (req, res, next) => {
-    idToRemove = req.params.id;
-    const movies = movieModel_1.Movie.findOne({ _id: idToRemove }, (err, movie) => {
+    const movies = movie_1.Movie.findOne({ _id: req._id }, (err, movie) => {
         if (err) {
             res.status(404).send({ message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'movie' });
         }
         else if (movie) {
             // Remove movie if movie in favorite and/or rate of a user
-            userModel_1.User.find()
+            user_1.User.find()
                 .cursor()
                 .eachAsync((user) => {
                 // Favorites
@@ -181,7 +181,7 @@ const deleteMovieById = async (req, res, next) => {
                 }
             });
             // Remove movie from DB
-            movieModel_1.Movie.deleteOne({ id: idToRemove }, (err) => {
+            movie_1.Movie.deleteOne({ id: req._id }, (err) => {
                 if (err) {
                     res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
                 }
@@ -230,13 +230,13 @@ const updateMetaData = async (req, res, next) => {
 exports.updateMetaData = updateMetaData;
 // Checks if a movie with the concerned movieDBId is in DB
 const isInDB = async (req, res, next) => {
-    const movies = movieModel_1.Movie.findOne({ movieDbId: req.params.movieDBId }, (err, movie) => {
+    const movies = movie_1.Movie.findOne({ movieDbId: req._movieDbId }, (err, movie) => {
         if (err) {
             res.status(404).send({
                 message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'movie',
             });
         }
-        else if (movies) {
+        else if (movie) {
             res.status(200).json(movie);
         }
     });

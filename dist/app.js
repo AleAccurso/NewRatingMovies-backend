@@ -8,26 +8,31 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const body_parser_1 = require("body-parser");
 const database_1 = require("./database/database");
 // Manage HTTP requests
-const serverError_1 = require("./handlers/serverError");
+const ErrorHandler_1 = require("./handlers/ErrorHandler");
 const httpHeaders_1 = require("./config/httpHeaders");
 // routes
 const userRouter_1 = __importDefault(require("./routes/userRouter"));
 const authRouter_1 = __importDefault(require("./routes/authRouter"));
 const movieRouter_1 = __importDefault(require("./routes/movieRouter"));
 const theMovideDBRouter_1 = __importDefault(require("./routes/theMovideDBRouter"));
-// Create app
-const app = (0, express_1.default)();
+const routes_1 = require("./middelware/routes");
+const server_1 = require("./server/server");
+// Create server
+const server = (0, express_1.default)();
+// connect DB
+(0, database_1.connectDB)();
 // Make env variable available
 dotenv_1.default.config();
 // HTTP requests setup
-app.use(body_parser_1.json);
-app.use((0, body_parser_1.urlencoded)({ extended: false }));
-app.use(httpHeaders_1.httpHeaders);
+server.use(body_parser_1.json);
+server.use((0, body_parser_1.urlencoded)({ extended: false }));
+server.use(httpHeaders_1.httpHeaders);
 // Routes
-app.use("/api/auth/", authRouter_1.default);
-app.use("/api/movies/", movieRouter_1.default);
-app.use("/api/users/", userRouter_1.default);
-app.use("/api/the-movie-db/", theMovideDBRouter_1.default);
-app.use(serverError_1.serverErrorManager);
+server.use("/api/auth/", authRouter_1.default);
+server.use("/api/movies/", movieRouter_1.default);
+server.use("/api/users/", userRouter_1.default);
+server.use("/api/the-movie-db/", theMovideDBRouter_1.default);
+server.use(routes_1.routerParamConverter);
+server.use(ErrorHandler_1.ErrorHandler);
 // Connect to db and run server
-(0, database_1.Initialise)(app);
+(0, server_1.start)(server);

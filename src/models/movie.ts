@@ -1,4 +1,5 @@
-import { Document } from "mongoose"
+import { ObjectId } from "mongodb"
+import { Document, Model } from "mongoose"
 
 type localMovieInfo = {
     title: string,
@@ -8,6 +9,7 @@ type localMovieInfo = {
 }
 
 export default interface IMovie extends Document {
+    _id: ObjectId,
     movieDbId: number,
     release_date: string,
     director: string,
@@ -20,3 +22,5 @@ export default interface IMovie extends Document {
     nl: localMovieInfo,
     it: localMovieInfo
 }
+
+export interface Movie extends Model<IMovie> {}

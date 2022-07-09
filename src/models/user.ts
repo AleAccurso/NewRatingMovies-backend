@@ -1,12 +1,16 @@
-import { Document } from "mongoose";
+import { Document, Model, ObjectId } from "mongoose";
+import { language } from "../types/language";
 
 export default interface IUser extends Document {
+    _id: ObjectId,
     nickname: string,
     email: string,
     password: string,
     isAdmin: boolean,
     myFavorites: number[],
     myRates: [{movieDbId: number, rate: number}],
-    language: "en" | "fr" | "it" | "nl",
+    language: language,
     profilePic: string
 }
+
+export interface User extends Model<IUser> {}

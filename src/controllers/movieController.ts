@@ -1,49 +1,50 @@
 import { RequestHandler } from 'express';
 import dotenv from 'dotenv';
 
-import { Movie } from '../models/movieModel';
-import { User } from '../models/userModel';
-
 import { MongoError } from 'mongodb';
 import { msg } from '../contants/responseMessages';
 
 import console from "console"
 
 import { exec } from 'child_process';
-import IMovie from '../interfaces/movie';
-import IUser from '../interfaces/user';
+import IMovie from '../models/movie';
+import IUser from '../models/user';
+import { Movie } from '../schema/movie';
+import { User } from '../schema/user';
+import MoviePagingDTO from '../dto/moviePagingDTO';
+
 
 dotenv.config();
 
 //get movies
 export const getMovies: RequestHandler = async (req, res, next) => {
 
-    const pageInt: number = parseInt(req.query.page as string);
-    const sizeInt: number = parseInt(req.query.size as string);
+    const pageInt: number = parseInt(req?.query?.page as string);
+    const sizeInt: number = parseInt(req?.query?.size as string);
 
     const data = req.query.data;
 
-    const totalNbMovies:number = await Movie.countDocuments({});
+    const totalNbMovies = await Movie.countDocuments({});
 
-    let dataToSend = {
+    let dataToSend: MoviePagingDTO = {
         nbMovies: totalNbMovies,
     };
 
-    if (!isNaN(pageInt) && !isNaN(sizeInt)) {
+    if (pageInt && sizeInt) {
         if (data == 'full') {
             const movies = Movie.find()
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
-                .exec((err, movies: IMovie[]) => {
-                    if (err) {
-                        res.status(500).send({ message: msg.SERVER_ERROR });
-                    } else if (movies) {
-                        dataToSend['movies'] = movies;
+                .exec((err, movies) => {
+                    if (movies) {
+                        dataToSend.movies = movies;
                         res.status(200).json(dataToSend);
+                    } else {
+                        res.status(500).send({ message: msg.SERVER_ERROR });
                     }
                 });
         } else if (data == 'admin') {
-            const movies: IMovie[] = Movie.find()
+            const movies = Movie.find()
                 .select({
                     release_date: 1,
                     vote_average: 1,
@@ -67,12 +68,12 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                 })
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
-                .exec((err: Error, movies: IMovie[]) => {
-                    if (err) {
-                        res.status(500).send({ message: msg.SERVER_ERROR });
-                    } else if (movies) {
-                        dataToSend['movies'] = movies;
+                .exec((err, movies) => {
+                    if (movies) {
+                        dataToSend.movies = movies;
                         res.status(200).json(dataToSend);
+                    } else {
+                        res.status(500).send({ message: msg.SERVER_ERROR });
                     }
                 });
         } else if (data == 'min') {
@@ -100,11 +101,11 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                 })
                 .skip(pageInt * sizeInt)
                 .limit(sizeInt)
-                .exec((err: Error, movies: IMovie[]) => {
+                .exec((err, movies) => {
                     if (err) {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     } else if (movies) {
-                        dataToSend['movies'] = movies;
+                        dataToSend.movies = movies;
                         res.status(200).json(dataToSend);
                     }
                 });
@@ -133,10 +134,10 @@ export const addMovie: RequestHandler = async (req, res, next) => {
 
 //Get movie by its id
 export const getMovieById: RequestHandler = async (req, res, next) => {
-    const movies = Movie.findOne({ _id: req.params.id }, (err: Error, movie: IMovie) => {
+    const movies = Movie.findOne({ _id: req._id }, (err: Error, movie: IMovie) => {
         if (err) {
             res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + 'movie' });
-        } else if (movies) {
+        } else if (movie) {
             res.status(200).json(movie);
         }
     });
@@ -145,11 +146,11 @@ export const getMovieById: RequestHandler = async (req, res, next) => {
 //Update a movie
 export const updateMovieById: RequestHandler = async (req, res, next) => {
     const movie = Movie.findOneAndUpdate(
-        { _id: req.params.id },
+        { _id: req._id },
         {
             ...req.body,
         },
-        (err: Error) => {
+        (err) => {
             if (err) {
                 res.status(500).send({ message: msg.SERVER_ERROR });
             } else {
@@ -161,8 +162,7 @@ export const updateMovieById: RequestHandler = async (req, res, next) => {
 
 //Delete movie from DB
 export const deleteMovieById: RequestHandler = async (req, res, next) => {
-    idToRemove = req.params.id;
-    const movies = Movie.findOne({ _id: idToRemove }, (err: Error, movie: IMovie) => {
+    const movies = Movie.findOne({ _id: req._id }, (err: Error, movie: IMovie) => {
         if (err) {
             res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + 'movie' });
         } else if (movie) {
@@ -186,7 +186,7 @@ export const deleteMovieById: RequestHandler = async (req, res, next) => {
                 });
 
             // Remove movie from DB
-            Movie.deleteOne({ id: idToRemove }, (err: Error) => {
+            Movie.deleteOne({ id: req._id }, (err) => {
                 if (err) {
                     res.status(500).send({ message: msg.SERVER_ERROR });
                 } else {
@@ -215,7 +215,7 @@ export const updateMetaData: RequestHandler = async (req, res, next) => {
 
         exec(
             `mkvpropedit "${job.path}" -e info -s title="${job.selectedMovie.title}"`,
-            (error: Error, stdout, stderr) => {
+            (error, stdout, stderr) => {
                 if (error) {
                     // console.log(`error: ${error.message}`);
                     // return;
@@ -242,13 +242,13 @@ export const updateMetaData: RequestHandler = async (req, res, next) => {
 // Checks if a movie with the concerned movieDBId is in DB
 export const isInDB: RequestHandler = async (req, res, next) => {
     const movies = Movie.findOne(
-        { movieDbId: req.params.movieDBId },
+        { movieDbId: req._movieDbId },
         (err: Error, movie: IMovie) => {
             if (err) {
                 res.status(404).send({
                     message: msg.RESOURCE_NOT_FOUND + 'movie',
                 });
-            } else if (movies) {
+            } else if (movie) {
                 res.status(200).json(movie);
             }
         },

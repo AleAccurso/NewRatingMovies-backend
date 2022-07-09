@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadPic = exports.removeOldPic = void 0;
-const userModel_1 = require("../models/userModel");
+const user_1 = require("../schema/user");
 const path_1 = __importDefault(require("path"));
 const storage_1 = require("@google-cloud/storage");
 const gc = new storage_1.Storage({
@@ -13,9 +13,9 @@ const gc = new storage_1.Storage({
 });
 const bucketName = 'new_rating_movies_profile_pics';
 const gcsBucket = gc.bucket('new_rating_movies_profile_pics');
-const removeOldPic = async (id) => {
+const removeOldPic = async (req, res, next) => {
     // Remove current profilePic from Google Cloud if not the default profile picture
-    let user = await userModel_1.User.findById(id).exec();
+    let user = await user_1.User.findById(req._id).exec();
     if (user) {
         try {
             if (user.profilePic != 'defaultPortrait.png') {

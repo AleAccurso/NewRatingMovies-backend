@@ -1,3 +1,5 @@
+import language from "./language"
+
 export {}; // Make the file a module
 
 declare global {
@@ -8,7 +10,7 @@ declare global {
             MONGOOSE_URI: string;
             API_URL: string;
             API_TOKEN: string;
-            LANGUAGES: 'en' | 'fr' | 'it' | 'nl';
+            LANGUAGES: [string];
             FRONT_URL: string;
         }
     }

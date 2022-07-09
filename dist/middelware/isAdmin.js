@@ -6,8 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isAdmin = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const responseMessages_1 = require("../contants/responseMessages");
-const userModel_1 = require("../models/userModel");
+const user_1 = require("../schema/user");
 const isAdmin = async (req, res, next) => {
+    let decoded;
     try {
         const authHeader = req.get('Authorization');
         if (!authHeader) {
@@ -16,15 +17,17 @@ const isAdmin = async (req, res, next) => {
             });
         }
         const token = authHeader.split(' ')[1];
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-        let user = await userModel_1.User.findOne({ email: decoded.email });
-        if (!user) {
-            return res.status(401).json({
-                message: responseMessages_1.msg.RESOURCE_NOT_FOUND + "user",
-            });
-        }
-        if (!user.isAdmin) {
-            throw new Error();
+        decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        if (typeof decoded != 'string') {
+            let user = await user_1.User.findOne({ email: decoded.email });
+            if (!user) {
+                return res.status(401).json({
+                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'user',
+                });
+            }
+            if (!user.isAdmin) {
+                throw new Error();
+            }
         }
         next();
     }
