@@ -1,6 +1,6 @@
 import { language } from "../types/language";
 
-export default interface UserReqCreateDTO {
+export default interface UserReqUpdateDTO {
     nickname: string,
     email: string,
     admin: boolean,
