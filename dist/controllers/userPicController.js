@@ -40,26 +40,28 @@ exports.removeOldPic = removeOldPic;
 const uploadPic = async (req, res) => {
     //Upload the new profilePic
     try {
+        // Get file from request
+        let file = req.file;
         //Send to Google Cloud
-        const blob = gcsBucket.file(req.file.originalname);
+        const blob = gcsBucket.file(file.originalname);
         const blobStream = blob.createWriteStream({
             resumable: false,
             metadata: {
-                contentType: req.file.mimetype,
+                contentType: file.mimetype,
             },
         });
         blobStream
             .on('finish', async () => {
-            req.file.cloudStorageObject = req.file.originalname;
+            file.cloudStorageObject = file.originalname;
         })
             .on('error', (err) => {
-            req.file.cloudStorageError = err;
+            file.cloudStorageError = err;
         })
-            .end(req.file.buffer);
+            .end(file.buffer);
     }
     catch (err) {
         res.status(500).send({
-            message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+            message: `Could not upload the file. ${err}`,
         });
     }
 };

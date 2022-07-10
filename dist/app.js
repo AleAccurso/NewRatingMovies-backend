@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const body_parser_1 = require("body-parser");
 const database_1 = require("./database/database");
 // Manage HTTP requests
@@ -21,8 +20,6 @@ const server_1 = require("./server/server");
 const server = (0, express_1.default)();
 // connect DB
 (0, database_1.connectDB)();
-// Make env variable available
-dotenv_1.default.config();
 // HTTP requests setup
 server.use(body_parser_1.json);
 server.use((0, body_parser_1.urlencoded)({ extended: false }));

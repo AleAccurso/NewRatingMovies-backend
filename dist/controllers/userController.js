@@ -19,24 +19,29 @@ const upload = Multer({
     },
 }).single('avatar');
 const getUsers = async (req, res, next) => {
-    const pageInt = req._page;
-    const sizeInt = req._size;
-    const user = user_1.User.find()
-        .skip(pageInt * sizeInt)
-        .limit(sizeInt)
-        .exec((err, users) => {
-        if (err) {
-            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-        }
-        else if (users) {
-            res.status(200).json(users);
-        }
-    });
+    const page = req === null || req === void 0 ? void 0 : req._page;
+    const size = req === null || req === void 0 ? void 0 : req._size;
+    if (typeof page != "undefined" && typeof size != "undefined") {
+        const user = user_1.User.find()
+            .skip(page * size)
+            .limit(size)
+            .exec((err, users) => {
+            if (err) {
+                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+            }
+            else if (users) {
+                res.status(200).json(users);
+            }
+        });
+    }
+    else {
+        res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'page_size' });
+    }
 };
 exports.getUsers = getUsers;
 //Get a user
 const getUserById = async (req, res, next) => {
-    let userId = req._userId;
+    const userId = req._userId;
     let isAdmin = req._userAdmin;
     if (isAdmin || userId == req._id) {
         const user = user_1.User.findOne({ _id: req._id }, (err, user) => {
@@ -65,25 +70,25 @@ const updateUserById = async (req, res, next) => {
         // Manage File in the update request
         if (fileToUpload) {
             // Remove old file
-            const remove = await (0, userPicController_1.removeOldPic)(req._id);
+            const remove = await (0, userPicController_1.removeOldPic)(req, res, next);
             // Get a new filename for the file
             let newfilename = Math.round(new Date().getTime());
-            let ext = req.file.mimetype.split('/')[1];
-            req.file.originalname = newfilename + '.' + ext;
+            let ext = fileToUpload.mimetype.split('/')[1];
+            fileToUpload.originalname = newfilename + '.' + ext;
             body.profilePic = newfilename + '.' + ext;
             // Send file to Google Cloud Storage
             try {
-                await util_1.default.promisify(upload);
-                const uploaded = await (0, userPicController_1.uploadPic)(req, res);
+                util_1.default.promisify(upload);
+                (0, userPicController_1.uploadPic)(req, res, next);
             }
-            catch (error) {
-                res.status(500).send({ message: error.message });
+            catch (err) {
+                res.status(500).send({ message: err });
             }
         }
         // Manage text field of the update request
         user_1.User.findOneAndUpdate({ _id: req.params.id }, {
             ...body,
-        }, (err) => {
+        }, null, (err) => {
             if (err) {
                 res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
             }
@@ -129,7 +134,7 @@ const deleteUserById = async (req, res, next) => {
 exports.deleteUserById = deleteUserById;
 // Add, modify & remove a rate
 const updateUserRate = async (req, res, next) => {
-    const user = user_1.User.findOne({ _id: req._id }, (err, user) => {
+    const user = user_1.User.findOne({ _id: req._id }, null, (err, user) => {
         if (err) {
             res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
         }
@@ -161,7 +166,7 @@ const updateUserRate = async (req, res, next) => {
             }
             res.status(200).json({
                 movieDbId: req._movieDbId,
-                rate: req._rate * 2,
+                rate: (typeof req._rate != 'undefined' ? req._rate : 0) * 2,
             });
         }
     });
@@ -169,23 +174,27 @@ const updateUserRate = async (req, res, next) => {
 exports.updateUserRate = updateUserRate;
 // Get info of favorite movies
 const getUserFavorites = async (req, res, next) => {
-    const pageInt = parseInt(req.query.page);
-    const sizeInt = parseInt(req.query.size);
+    const page = req._page;
+    const size = req._size;
     let user = await user_1.User.findOne({ _id: req._id }).exec();
     let movies = [];
-    await Promise.all(user.myFavorites.map(async (id) => {
-        await movie_1.Movie.findOne({ movieDbId: id }).then((movieInfo) => {
-            if (movieInfo) {
-                movies.push(movieInfo);
+    if (user) {
+        await Promise.all(user.myFavorites.map(async (id) => {
+            const movie = await movie_1.Movie.findOne({ movieDbId: id });
+            if (movie) {
+                movies.push(movie);
             }
-        });
-    }));
+            ;
+        }));
+    }
     let nbMovies = movies.length;
-    movies = movies.slice(pageInt * sizeInt, sizeInt + pageInt * sizeInt);
+    if (page && size) {
+        movies = movies.slice(page * size, size + page * size);
+    }
     const toReturn = {
         nbFavorites: nbMovies,
-        page: pageInt,
-        perPage: sizeInt,
+        page: page,
+        perPage: size,
         movies: movies,
     };
     res.status(200).json(toReturn);

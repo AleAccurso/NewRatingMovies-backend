@@ -12,6 +12,7 @@ import IUser from '../models/user';
 import { Movie } from '../schema/movie';
 import { User } from '../schema/user';
 import MoviePagingDTO from '../dto/moviePagingDTO';
+import UserReqUpdateDTO from '../dto/userReqUpdateDTO';
 
 
 dotenv.config();
@@ -19,10 +20,9 @@ dotenv.config();
 //get movies
 export const getMovies: RequestHandler = async (req, res, next) => {
 
-    const pageInt: number = parseInt(req?.query?.page as string);
-    const sizeInt: number = parseInt(req?.query?.size as string);
-
-    const data = req.query.data;
+    const page = req?._page;
+    const size = req?._size;
+    const dataType = req.query.data;
 
     const totalNbMovies = await Movie.countDocuments({});
 
@@ -30,11 +30,11 @@ export const getMovies: RequestHandler = async (req, res, next) => {
         nbMovies: totalNbMovies,
     };
 
-    if (pageInt && sizeInt) {
-        if (data == 'full') {
+    if (typeof page != "undefined" && typeof size != "undefined") {
+        if (dataType == 'full') {
             const movies = Movie.find()
-                .skip(pageInt * sizeInt)
-                .limit(sizeInt)
+                .skip(page * size)
+                .limit(size)
                 .exec((err, movies) => {
                     if (movies) {
                         dataToSend.movies = movies;
@@ -43,7 +43,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     }
                 });
-        } else if (data == 'admin') {
+        } else if (dataType == 'admin') {
             const movies = Movie.find()
                 .select({
                     release_date: 1,
@@ -66,8 +66,8 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                         overview: 1,
                     },
                 })
-                .skip(pageInt * sizeInt)
-                .limit(sizeInt)
+                .skip(page * size)
+                .limit(size)
                 .exec((err, movies) => {
                     if (movies) {
                         dataToSend.movies = movies;
@@ -76,7 +76,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     }
                 });
-        } else if (data == 'min') {
+        } else if (dataType == 'min') {
             const movies = Movie.find()
                 .select({
                     _id: 1,
@@ -99,8 +99,8 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                         poster_path: 1,
                     },
                 })
-                .skip(pageInt * sizeInt)
-                .limit(sizeInt)
+                .skip(page * size)
+                .limit(size)
                 .exec((err, movies) => {
                     if (err) {
                         res.status(500).send({ message: msg.SERVER_ERROR });
@@ -145,16 +145,18 @@ export const getMovieById: RequestHandler = async (req, res, next) => {
 
 //Update a movie
 export const updateMovieById: RequestHandler = async (req, res, next) => {
+    const newData = req.body as UserReqUpdateDTO
     const movie = Movie.findOneAndUpdate(
         { _id: req._id },
         {
-            ...req.body,
+            ...newData,
         },
+        null,
         (err) => {
             if (err) {
                 res.status(500).send({ message: msg.SERVER_ERROR });
             } else {
-                res.status(200).json(req.body);
+                res.status(200).json(movie);
             }
         },
     );

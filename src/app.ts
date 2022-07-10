@@ -1,5 +1,4 @@
 import express from "express";
-import dotenv from 'dotenv';
 import { json, urlencoded } from "body-parser";
 
 import { connectDB } from "./database/database"
@@ -22,9 +21,6 @@ const server = express();
 
 // connect DB
 connectDB()
-
-// Make env variable available
-dotenv.config()
 
 // HTTP requests setup
 server.use(json);

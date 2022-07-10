@@ -13,19 +13,18 @@ const user_1 = require("../schema/user");
 dotenv_1.default.config();
 //get movies
 const getMovies = async (req, res, next) => {
-    var _a, _b;
-    const pageInt = parseInt((_a = req === null || req === void 0 ? void 0 : req.query) === null || _a === void 0 ? void 0 : _a.page);
-    const sizeInt = parseInt((_b = req === null || req === void 0 ? void 0 : req.query) === null || _b === void 0 ? void 0 : _b.size);
-    const data = req.query.data;
+    const page = req === null || req === void 0 ? void 0 : req._page;
+    const size = req === null || req === void 0 ? void 0 : req._size;
+    const dataType = req.query.data;
     const totalNbMovies = await movie_1.Movie.countDocuments({});
     let dataToSend = {
         nbMovies: totalNbMovies,
     };
-    if (pageInt && sizeInt) {
-        if (data == 'full') {
+    if (typeof page != "undefined" && typeof size != "undefined") {
+        if (dataType == 'full') {
             const movies = movie_1.Movie.find()
-                .skip(pageInt * sizeInt)
-                .limit(sizeInt)
+                .skip(page * size)
+                .limit(size)
                 .exec((err, movies) => {
                 if (movies) {
                     dataToSend.movies = movies;
@@ -36,7 +35,7 @@ const getMovies = async (req, res, next) => {
                 }
             });
         }
-        else if (data == 'admin') {
+        else if (dataType == 'admin') {
             const movies = movie_1.Movie.find()
                 .select({
                 release_date: 1,
@@ -59,8 +58,8 @@ const getMovies = async (req, res, next) => {
                     overview: 1,
                 },
             })
-                .skip(pageInt * sizeInt)
-                .limit(sizeInt)
+                .skip(page * size)
+                .limit(size)
                 .exec((err, movies) => {
                 if (movies) {
                     dataToSend.movies = movies;
@@ -71,7 +70,7 @@ const getMovies = async (req, res, next) => {
                 }
             });
         }
-        else if (data == 'min') {
+        else if (dataType == 'min') {
             const movies = movie_1.Movie.find()
                 .select({
                 _id: 1,
@@ -94,8 +93,8 @@ const getMovies = async (req, res, next) => {
                     poster_path: 1,
                 },
             })
-                .skip(pageInt * sizeInt)
-                .limit(sizeInt)
+                .skip(page * size)
+                .limit(size)
                 .exec((err, movies) => {
                 if (err) {
                     res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
@@ -143,14 +142,15 @@ const getMovieById = async (req, res, next) => {
 exports.getMovieById = getMovieById;
 //Update a movie
 const updateMovieById = async (req, res, next) => {
+    const newData = req.body;
     const movie = movie_1.Movie.findOneAndUpdate({ _id: req._id }, {
-        ...req.body,
-    }, (err) => {
+        ...newData,
+    }, null, (err) => {
         if (err) {
             res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
         }
         else {
-            res.status(200).json(req.body);
+            res.status(200).json(movie);
         }
     });
 };

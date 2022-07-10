@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express';
 import { User } from "../schema/user";
-import { ObjectId } from 'mongoose';
 
 import path from 'path';
 import { Storage } from "@google-cloud/storage";
+import { FileRequest } from '../interfaces/file';
 
 const gc = new Storage({
     keyFilename: path.join(__dirname, '../google-credentials.json'),
@@ -40,27 +40,30 @@ export const removeOldPic: RequestHandler = async (req, res, next) => {
 export const uploadPic: RequestHandler = async (req, res) => {
     //Upload the new profilePic
     try {
+        // Get file from request
+        let file = req.file as FileRequest
+
         //Send to Google Cloud
-        const blob = gcsBucket.file(req.file.originalname);
+        const blob = gcsBucket.file(file.originalname);
 
         const blobStream = blob.createWriteStream({
             resumable: false,
             metadata: {
-                contentType: req.file.mimetype,
+                contentType: file.mimetype,
             },
         });
 
         blobStream
             .on('finish', async () => {
-                req.file.cloudStorageObject = req.file.originalname;
+                file.cloudStorageObject = file.originalname;
             })
-            .on('error', (err: Error) => {
-                req.file.cloudStorageError = err;
+            .on('error', (err) => {
+                file.cloudStorageError = err;
             })
-            .end(req.file.buffer);
+            .end(file.buffer);
     } catch (err) {
         res.status(500).send({
-            message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+            message: `Could not upload the file. ${err}`,
         });
     }
 };

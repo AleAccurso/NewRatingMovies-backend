@@ -3,7 +3,7 @@ import { RequestHandler } from 'express';
 import { User } from '../schema/user';
 import { Movie } from '../schema/movie';
 
-import { Schema } from 'mongoose';
+import { CallbackError, Schema } from 'mongoose';
 import IMovie from '../models/movie';
 import UserReqUpdateDTO from "../dto/userReqUpdateDTO"
 
@@ -13,6 +13,7 @@ import { removeOldPic, uploadPic } from './userPicController';
 import util from 'util';
 import IUser from '../models/user';
 import { ObjectId } from 'mongodb';
+import { FileRequest } from '../interfaces/file';
 
 //Update user - To manage formData
 const Multer = require('multer');
@@ -24,24 +25,28 @@ const upload = Multer({
 }).single('avatar');
 
 export const getUsers: RequestHandler = async (req, res, next) => {
-    const pageInt = req._page;
-    const sizeInt = req._size;
+    const page = req?._page;
+    const size = req?._size;
 
-    const user = User.find()
-        .skip(pageInt * sizeInt)
-        .limit(sizeInt)
-        .exec((err, users) => {
-            if (err) {
-                res.status(500).send({ message: msg.SERVER_ERROR });
-            } else if (users) {
-                res.status(200).json(users);
-            }
-        });
+    if (typeof page != "undefined" && typeof size != "undefined"){
+        const user = User.find()
+            .skip(page * size)
+            .limit(size)
+            .exec((err, users) => {
+                if (err) {
+                    res.status(500).send({ message: msg.SERVER_ERROR });
+                } else if (users) {
+                    res.status(200).json(users);
+                }
+            });
+    } else {
+        res.status(400).json({ message: msg.BAD_PARAMS + 'page_size' });
+    }
 };
 
 //Get a user
 export const getUserById: RequestHandler = async (req, res, next) => {
-    let userId = req._userId;
+    const userId = req._userId;
     let isAdmin = req._userAdmin;
 
     if (isAdmin || userId == req._id) {
@@ -64,8 +69,8 @@ export const getUserById: RequestHandler = async (req, res, next) => {
 
 //update a user
 export const updateUserById: RequestHandler = async (req, res, next) => {
-    let fileToUpload = req.file;
-    let body:UserReqUpdateDTO = req.body;
+    let fileToUpload = req.file as FileRequest;
+    let body = req.body as UserReqUpdateDTO;
 
     let userId = req._userId;
     let isAdmin = req._userAdmin;
@@ -74,20 +79,20 @@ export const updateUserById: RequestHandler = async (req, res, next) => {
         // Manage File in the update request
         if (fileToUpload) {
             // Remove old file
-            const remove = await removeOldPic(req._id);
+            const remove = await removeOldPic(req, res, next);
 
             // Get a new filename for the file
             let newfilename = Math.round(new Date().getTime());
-            let ext = req.file.mimetype.split('/')[1];
-            req.file.originalname = newfilename + '.' + ext;
+            let ext = fileToUpload.mimetype.split('/')[1];
+            fileToUpload.originalname = newfilename + '.' + ext;
             body.profilePic = newfilename + '.' + ext;
 
             // Send file to Google Cloud Storage
             try {
-                await util.promisify(upload);
-                const uploaded = await uploadPic(req, res);
-            } catch (error: Error) {
-                res.status(500).send({ message: error.message });
+                util.promisify(upload);
+                uploadPic(req, res, next);
+            } catch (err) {
+                res.status(500).send({ message: err });
             }
         }
 
@@ -97,7 +102,8 @@ export const updateUserById: RequestHandler = async (req, res, next) => {
             {
                 ...body,
             },
-            (err: Error) => {
+            null,
+            (err:CallbackError) => {
                 if (err) {
                     res.status(500).send({ message: msg.SERVER_ERROR });
                 } else {
@@ -145,7 +151,8 @@ export const deleteUserById: RequestHandler = async (req, res, next) => {
 export const updateUserRate: RequestHandler = async (req, res, next) => {
     const user = User.findOne(
         { _id: req._id },
-        (err: Error, user: IUser) => {
+        null,
+        (err, user) => {
             if (err) {
                 res.status(500).send({ message: msg.SERVER_ERROR });
             } else if (user) {
@@ -179,7 +186,7 @@ export const updateUserRate: RequestHandler = async (req, res, next) => {
 
                 res.status(200).json({
                     movieDbId: req._movieDbId,
-                    rate: req._rate * 2,
+                    rate: (typeof req._rate != 'undefined'? req._rate : 0) * 2,
                 });
             }
         },
@@ -188,33 +195,34 @@ export const updateUserRate: RequestHandler = async (req, res, next) => {
 
 // Get info of favorite movies
 export const getUserFavorites: RequestHandler = async (req, res, next) => {
-    const pageInt: number = parseInt(req.query.page as string);
-    const sizeInt: number = parseInt(req.query.size as string);
+    const page = req._page;
+    const size = req._size;
 
     let user = await User.findOne({ _id: req._id }).exec();
 
-    let movies = [] as Schema<IMovie>[];
-
-    await Promise.all(
-        user.myFavorites.map(async (id) => {
-            await Movie.findOne({ movieDbId: id }).then(
-                (movieInfo) => {
-                    if (movieInfo) {
-                        movies.push(movieInfo);
-                    }
-                },
-            );
-        }),
-    );
+    let movies = [] as IMovie[];
+    
+    if (user) {
+        await Promise.all(
+            user.myFavorites.map(async (id) => {
+                const movie = await Movie.findOne({ movieDbId: id });
+                if (movie) {
+                    movies.push(movie);
+                };
+            }),
+        );
+    }
 
     let nbMovies = movies.length;
 
-    movies = movies.slice(pageInt * sizeInt, sizeInt + pageInt * sizeInt);
+    if (page && size) {
+        movies = movies.slice(page * size, size + page * size);
+    }
 
     const toReturn = {
         nbFavorites: nbMovies,
-        page: pageInt,
-        perPage: sizeInt,
+        page: page,
+        perPage: size,
         movies: movies,
     };
 

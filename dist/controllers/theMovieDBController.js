@@ -51,18 +51,19 @@ exports.getSearchResultsFromAPI = getSearchResultsFromAPI;
 // Here, the id is actually the id of the movie in the API
 // movieDbId in our DB
 const getInfoFromAPI = async (req, res, next) => {
-    let infoToReturn;
+    const movieDbId = req._movieDbId;
+    let infoToReturn = {};
     const generalDetails = await axios_1.default
         .get(process.env.API_URL +
         '/movie/' +
-        req.params.id +
+        movieDbId +
         '?api_key=' +
         process.env.API_TOKEN +
         '&append_to_response=credits&language=en')
         .then((response) => {
         let fullMovieData = response.data;
         //gets the director's name
-        let director = null;
+        let director = '';
         Object.entries(fullMovieData.credits.crew).forEach((crew) => {
             if (crew[1].job == 'Director') {
                 director = crew[1].name;
@@ -88,9 +89,6 @@ const getInfoFromAPI = async (req, res, next) => {
                     ' - ' + fullMovieData['credits']['cast'][2]['name'];
             }
         }
-        if (actors.count === 0) {
-            actors = null;
-        }
         //Build bassic object to return
         infoToReturn = {
             movieDbId: fullMovieData['id'],
@@ -115,7 +113,7 @@ const getInfoFromAPI = async (req, res, next) => {
         next(err);
     });
     //Add information of the other languages
-    let langList = JSON.parse(process.env.LANGUAGES);
+    let langList = process.env.LANGUAGES;
     for (let index = 0; index < langList.length; index++) {
         const localInfo = await axios_1.default
             .get(process.env.API_URL +
@@ -126,12 +124,26 @@ const getInfoFromAPI = async (req, res, next) => {
             '&language=' +
             langList[index])
             .then(async (response) => {
-            fullMovieData = await response.data;
-            infoToReturn[langList[index]] = {
+            let fullMovieData = response.data;
+            let local = {
                 title: fullMovieData['title'],
                 overview: fullMovieData['overview'],
                 poster_path: fullMovieData['poster_path'],
             };
+            switch (langList[index]) {
+                case 'en':
+                    infoToReturn.en = local;
+                    break;
+                case 'fr':
+                    infoToReturn.fr = local;
+                    break;
+                case 'it':
+                    infoToReturn.it = local;
+                    break;
+                case 'nl':
+                    infoToReturn.nl = local;
+                    break;
+            }
         })
             .catch((err) => {
             if (!err.statusCode) {
@@ -148,25 +160,45 @@ const getInfoFromAPI = async (req, res, next) => {
         const trailers = await axios_1.default
             .get(process.env.API_URL +
             '/movie/' +
-            req.params.id +
+            movieDbId +
             '/videos?api_key=' +
             process.env.API_TOKEN +
             '&language=' +
             langList[index])
             .then(async (response) => {
-            videos = await response.data.results;
+            const videos = (await response.data
+                .results);
             let movieTrailers = [];
             videos.forEach((video) => {
                 if (video.site == 'YouTube' &&
                     ['Trailer', 'Teaser'].includes(video.type)) {
                     let toAdd = {
-                        name: video.name,
+                        title: video.name,
                         key: video.key,
                     };
                     movieTrailers.push(toAdd);
                 }
             });
-            infoToReturn[langList[index]].trailers = movieTrailers;
+            if (typeof movieTrailers != 'undefined') {
+                switch (langList[index]) {
+                    case 'en':
+                        if (infoToReturn.en)
+                            infoToReturn.en.trailers = movieTrailers;
+                        break;
+                    case 'fr':
+                        if (infoToReturn.fr)
+                            infoToReturn.fr.trailers = movieTrailers;
+                        break;
+                    case 'it':
+                        if (infoToReturn.it)
+                            infoToReturn.it.trailers = movieTrailers;
+                        break;
+                    case 'nl':
+                        if (infoToReturn.nl)
+                            infoToReturn.nl.trailers = movieTrailers;
+                        break;
+                }
+            }
         })
             .catch((err) => {
             if (!err.statusCode) {
