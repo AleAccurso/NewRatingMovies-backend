@@ -50,10 +50,11 @@ export const register: RequestHandler = async (req, res, next) => {
     }
 };
 
-let loadedUser: IUser;
+let loadedUser= {} as IUser;
 
 export const login: RequestHandler = async (req, res, next) => {
     const { email, password }:IUser = req.body;
+    console.log("🚀 ~ constlogin:RequestHandler= ~ email", email);
 
     try {
         const user = await User.findOne({ email: email }).exec();

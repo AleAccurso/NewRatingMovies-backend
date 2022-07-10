@@ -42,9 +42,10 @@ const register = async (req, res, next) => {
     }
 };
 exports.register = register;
-let loadedUser;
+let loadedUser = {};
 const login = async (req, res, next) => {
     const { email, password } = req.body;
+    console.log("🚀 ~ constlogin:RequestHandler= ~ email", email);
     try {
         const user = await user_1.User.findOne({ email: email }).exec();
         if (!user) {
