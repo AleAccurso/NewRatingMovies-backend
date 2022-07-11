@@ -4,6 +4,7 @@ exports.routerParamConverter = void 0;
 const mongodb_1 = require("mongodb");
 const responseMessages_1 = require("../contants/responseMessages");
 const routerParamConverter = (req, res, next) => {
+    console.log("in routerParamConverter");
     if (req.query && req.query.page && typeof req.query.page === 'string') {
         let page = Number(req.query.page);
         if (!isNaN(page)) {

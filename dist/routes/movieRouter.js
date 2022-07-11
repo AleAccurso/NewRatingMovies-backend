@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const isAdmin_1 = require("../middelware/isAdmin");
 const movieController = __importStar(require("../controllers/movieController"));
+const routes_1 = require("../middelware/routes");
 const router = (0, express_1.Router)();
 router
     .route("/")
@@ -33,9 +34,9 @@ router
     .post(isAdmin_1.isAdmin, movieController.addMovie); // Add a movie
 router
     .route("/:id")
-    .get(movieController.getMovieById)
-    .patch(isAdmin_1.isAdmin, movieController.updateMovieById)
-    .delete(isAdmin_1.isAdmin, movieController.deleteMovieById);
-router.post("/:id/metadata", isAdmin_1.isAdmin, movieController.updateMetaData); //Change metadata a MKV file on the hard drive
-router.get("/check/:movieDBId", isAdmin_1.isAdmin, movieController.isInDB); //Change metadata a MKV file on the hard drive
+    .get(routes_1.routerParamConverter, movieController.getMovieById)
+    .patch(isAdmin_1.isAdmin, routes_1.routerParamConverter, movieController.updateMovieById)
+    .delete(isAdmin_1.isAdmin, routes_1.routerParamConverter, movieController.deleteMovieById);
+router.post("/:id/metadata", routes_1.routerParamConverter, isAdmin_1.isAdmin, movieController.updateMetaData); //Change metadata a MKV file on the hard drive
+router.get("/check/:movieDBId", routes_1.routerParamConverter, isAdmin_1.isAdmin, movieController.isInDB); //Change metadata a MKV file on the hard drive
 exports.default = router;

@@ -1,6 +1,5 @@
 import { RequestHandler } from "express"; 
 import jwt from "jsonwebtoken";
-import { ObjectId } from "mongoose";
 import { authMsg } from "../contants/responseMessages";
 import { User } from "../schema/user";
 
