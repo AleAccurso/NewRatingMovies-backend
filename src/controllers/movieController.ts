@@ -13,6 +13,8 @@ import { User } from '../schema/user';
 import MoviePagingDTO from '../dto/moviePagingDTO';
 import UserReqUpdateDTO from '../dto/userReqUpdateDTO';
 import { parseToInt } from '../utils/parseToInt';
+import { RequestTypeEnum } from '../enums/requestType';
+import { ToRequestType } from '../utils/parseToRequestType';
 import { requestType } from '../types/requestType';
 
 dotenv.config();
@@ -25,7 +27,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
         const parseResult = parseToInt(req.query.page as string);
 
         if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-            res.status(400).json({ message: msg.BAD_PARAMS + req.query.page });
+            res.status(400).json({ message: parseResult.error });
         } else {
             pageInt = parseResult.parsedInt;
         }
@@ -37,19 +39,21 @@ export const getMovies: RequestHandler = async (req, res, next) => {
         const parseResult = parseToInt(req.query.size as string);
 
         if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-            res.status(400).json({ message: msg.BAD_PARAMS + req.query.size });
+            res.status(400).json({ message: parseResult.error });
         } else {
             sizeInt = parseResult.parsedInt;
         }
     }
 
-    let dataType: requestType = "unknown" as requestType;
+    let dataType: requestType = RequestTypeEnum.UNKNOWN;
 
     if (req && req.query && req.query.data) {
-        if (process.env.REQUEST_TYPES.includes(req.query.data as string)) {
-            dataType = req.query.data as requestType;
-        } else {
+        const parseData = ToRequestType(req.query.data as string)
+
+        if (parseData === RequestTypeEnum.UNKNOWN as requestType) {
             res.status(400).json({ message: msg.BAD_PARAMS + req.query.data });
+        } else {
+            dataType = parseData;
         }
     }
 
@@ -59,7 +63,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
         nbMovies: totalNbMovies,
     };
 
-    if (typeof dataType != 'undefined' && dataType == 'full') {
+    if (dataType == RequestTypeEnum.FULL) {
         const movies = Movie.find()
             .skip(pageInt * sizeInt)
             .limit(sizeInt)
@@ -71,7 +75,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                     res.status(500).send({ message: msg.SERVER_ERROR });
                 }
             });
-    } else if (dataType == 'admin') {
+    } else if (dataType == RequestTypeEnum.ADMIN) {
         const movies = Movie.find()
             .select({
                 release_date: 1,
@@ -104,7 +108,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                     res.status(500).send({ message: msg.SERVER_ERROR });
                 }
             });
-    } else if (dataType == 'min') {
+    } else if (dataType == RequestTypeEnum.MINIMUM) {
         const movies = Movie.find()
             .select({
                 _id: 1,
@@ -137,8 +141,6 @@ export const getMovies: RequestHandler = async (req, res, next) => {
                     res.status(200).json(dataToSend);
                 }
             });
-    } else {
-        res.status(400).json({ message: msg.BAD_PARAMS + 'data' });
     }
 };
 

@@ -1,3 +1,3 @@
-const availableLanguages = ["en", "fr", "it", "nl"] as const
+import { LanguagesEnum } from "../enums/languages";
 
-export type language = typeof availableLanguages[number];
+export type language = `${LanguagesEnum}`;

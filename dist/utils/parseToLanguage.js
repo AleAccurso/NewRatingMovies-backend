@@ -1,17 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseToInt = void 0;
-const responseMessages_1 = require("../contants/responseMessages");
-const parseToInt = (str) => {
-    let parsedLang = undefined;
-    let error = undefined;
-    let availableLanguages = process.env.LANGUAGES;
-    if (availableLanguages.includes(str)) {
-        parsedLang = str;
+exports.ToLanguage = void 0;
+const languages_1 = require("../enums/languages");
+function ToLanguage(str) {
+    if (Object.values(languages_1.LanguagesEnum).includes(str)) {
+        return str;
     }
     else {
-        error = new Error(responseMessages_1.msg.BAD_PARAMS + str);
+        return languages_1.LanguagesEnum.UNKNOWN;
     }
-    return { parsedLanguage: parsedLang, error: error };
-};
-exports.parseToInt = parseToInt;
+}
+exports.ToLanguage = ToLanguage;

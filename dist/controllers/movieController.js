@@ -11,6 +11,8 @@ const child_process_1 = require("child_process");
 const movie_1 = require("../schema/movie");
 const user_1 = require("../schema/user");
 const parseToInt_1 = require("../utils/parseToInt");
+const requestType_1 = require("../enums/requestType");
+const parseToRequestType_1 = require("../utils/parseToRequestType");
 dotenv_1.default.config();
 //get movies
 const getMovies = async (req, res, next) => {
@@ -18,7 +20,7 @@ const getMovies = async (req, res, next) => {
     if (req && req.query && req.query.page) {
         const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
         if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.page });
+            res.status(400).json({ message: parseResult.error });
         }
         else {
             pageInt = parseResult.parsedInt;
@@ -28,26 +30,27 @@ const getMovies = async (req, res, next) => {
     if (req && req.query && req.query.size) {
         const parseResult = (0, parseToInt_1.parseToInt)(req.query.size);
         if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.size });
+            res.status(400).json({ message: parseResult.error });
         }
         else {
             sizeInt = parseResult.parsedInt;
         }
     }
-    let dataType = "unknown";
+    let dataType = requestType_1.RequestTypeEnum.UNKNOWN;
     if (req && req.query && req.query.data) {
-        if (process.env.REQUEST_TYPES.includes(req.query.data)) {
-            dataType = req.query.data;
+        const parseData = (0, parseToRequestType_1.ToRequestType)(req.query.data);
+        if (parseData === requestType_1.RequestTypeEnum.UNKNOWN) {
+            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.data });
         }
         else {
-            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.data });
+            dataType = parseData;
         }
     }
     const totalNbMovies = await movie_1.Movie.countDocuments({});
     let dataToSend = {
         nbMovies: totalNbMovies,
     };
-    if (typeof dataType != 'undefined' && dataType == 'full') {
+    if (dataType == requestType_1.RequestTypeEnum.FULL) {
         const movies = movie_1.Movie.find()
             .skip(pageInt * sizeInt)
             .limit(sizeInt)
@@ -61,7 +64,7 @@ const getMovies = async (req, res, next) => {
             }
         });
     }
-    else if (dataType == 'admin') {
+    else if (dataType == requestType_1.RequestTypeEnum.ADMIN) {
         const movies = movie_1.Movie.find()
             .select({
             release_date: 1,
@@ -96,7 +99,7 @@ const getMovies = async (req, res, next) => {
             }
         });
     }
-    else if (dataType == 'min') {
+    else if (dataType == requestType_1.RequestTypeEnum.MINIMUM) {
         const movies = movie_1.Movie.find()
             .select({
             _id: 1,
@@ -130,9 +133,6 @@ const getMovies = async (req, res, next) => {
                 res.status(200).json(dataToSend);
             }
         });
-    }
-    else {
-        res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'data' });
     }
 };
 exports.getMovies = getMovies;

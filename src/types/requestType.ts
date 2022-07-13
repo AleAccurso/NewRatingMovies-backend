@@ -1,3 +1,3 @@
-const availableRequestTypes = ["min", "admin", "full"] as const
+import { RequestTypeEnum } from "../enums/requestType";
 
-export type requestType = typeof availableRequestTypes[number];
+export type requestType = `${RequestTypeEnum}`;

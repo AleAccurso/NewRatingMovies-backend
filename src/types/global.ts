@@ -6,9 +6,6 @@ declare global {
             MONGOOSE_URI: string;
             API_URL: string;
             API_TOKEN: string;
-            LANGUAGES: string[];
-            REQUEST_TYPES: string[];
-            FRONT_URL: string;
         }
     }
 }

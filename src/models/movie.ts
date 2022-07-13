@@ -1,11 +1,16 @@
 import { ObjectId } from "mongodb"
 import { Document, Model } from "mongoose"
 
+export interface rate {
+    title:string,
+    key: string
+}
+
 export interface localMovieInfo {
     title: string,
     overview: string,
     poster_path: string,
-    trailers?: {title:string, key: string}[]
+    trailers?: rate[]
 }
 
 export default interface IMovie extends Document {

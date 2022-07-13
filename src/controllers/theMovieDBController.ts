@@ -5,6 +5,7 @@ import IMovie from '../models/movie';
 import { Trailer } from '../interfaces/trailer';
 import { MovieInfoAPI } from '../interfaces/movieInfo';
 import { localMovieInfo } from '../models/movie';
+import { LanguagesEnum } from '../enums/languages';
 
 //Get search result from api
 export const getSearchResultsFromAPI: RequestHandler = (req, res, next) => {
@@ -131,7 +132,7 @@ export const getInfoFromAPI: RequestHandler = async (req, res, next) => {
         });
 
     //Add information of the other languages
-    let langList = process.env.LANGUAGES;
+    let langList = Object.values(LanguagesEnum);
 
     for (let index = 0; index < langList.length; index++) {
         const localInfo = await axios

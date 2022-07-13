@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInfoFromAPI = exports.getSearchResultsFromAPI = void 0;
 const axios_1 = __importDefault(require("axios"));
 const responseMessages_1 = require("../contants/responseMessages");
+const languages_1 = require("../enums/languages");
 //Get search result from api
 const getSearchResultsFromAPI = (req, res, next) => {
     let url = process.env.API_URL +
@@ -113,7 +114,7 @@ const getInfoFromAPI = async (req, res, next) => {
         next(err);
     });
     //Add information of the other languages
-    let langList = process.env.LANGUAGES;
+    let langList = Object.values(languages_1.LanguagesEnum);
     for (let index = 0; index < langList.length; index++) {
         const localInfo = await axios_1.default
             .get(process.env.API_URL +
