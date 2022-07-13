@@ -1,10 +1,9 @@
 import express from 'express';
 import { start } from './server/server';
-import { connectDB } from "./database/database";
 import { json, urlencoded } from 'body-parser';
 
 // Manage HTTP requests
-import { errorHelper } from './handlers/ErrorHandler';
+import { errorHelper } from './middelware/error';
 import { httpHeaders } from './config/httpHeaders';
 
 // routes
@@ -12,6 +11,7 @@ import userRouter from './routes/userRouter';
 import authRouter from './routes/authRouter';
 import movieRouter from './routes/movieRouter';
 import theMovideDBRouter from './routes/theMovideDBRouter';
+import { connectDB } from './database/database';
 
 // Create server
 const server = express();

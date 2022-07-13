@@ -30,6 +30,7 @@ export const isAuth: RequestHandler = async (req, res, next) => {
   }
 
   if (typeof decodedToken != "string"){
+    console.log("🚀 ~ constisAuth:RequestHandler= ~ decodedToken", decodedToken);
     let user = await User.findOne({ email: decodedToken.email as string});
     
     if (user) {

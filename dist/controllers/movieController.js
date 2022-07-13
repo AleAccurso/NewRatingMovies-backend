@@ -10,107 +10,129 @@ const console_1 = __importDefault(require("console"));
 const child_process_1 = require("child_process");
 const movie_1 = require("../schema/movie");
 const user_1 = require("../schema/user");
+const parseToInt_1 = require("../utils/parseToInt");
 dotenv_1.default.config();
 //get movies
 const getMovies = async (req, res, next) => {
-    const page = req === null || req === void 0 ? void 0 : req._page;
-    const size = req === null || req === void 0 ? void 0 : req._size;
-    const dataType = req.query.data;
+    let pageInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.page });
+        }
+        else {
+            pageInt = parseResult.parsedInt;
+        }
+    }
+    let sizeInt = -1;
+    if (req && req.query && req.query.size) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.size);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.size });
+        }
+        else {
+            sizeInt = parseResult.parsedInt;
+        }
+    }
+    let dataType = "unknown";
+    if (req && req.query && req.query.data) {
+        if (process.env.REQUEST_TYPES.includes(req.query.data)) {
+            dataType = req.query.data;
+        }
+        else {
+            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.data });
+        }
+    }
     const totalNbMovies = await movie_1.Movie.countDocuments({});
     let dataToSend = {
         nbMovies: totalNbMovies,
     };
-    if (typeof page != "undefined" && typeof size != "undefined") {
-        if (dataType == 'full') {
-            const movies = movie_1.Movie.find()
-                .skip(page * size)
-                .limit(size)
-                .exec((err, movies) => {
-                if (movies) {
-                    dataToSend.movies = movies;
-                    res.status(200).json(dataToSend);
-                }
-                else {
-                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-                }
-            });
-        }
-        else if (dataType == 'admin') {
-            const movies = movie_1.Movie.find()
-                .select({
-                release_date: 1,
-                vote_average: 1,
-                director: 1,
-                en: {
-                    title: 1,
-                    overview: 1,
-                },
-                fr: {
-                    title: 1,
-                    overview: 1,
-                },
-                it: {
-                    title: 1,
-                    overview: 1,
-                },
-                nl: {
-                    title: 1,
-                    overview: 1,
-                },
-            })
-                .skip(page * size)
-                .limit(size)
-                .exec((err, movies) => {
-                if (movies) {
-                    dataToSend.movies = movies;
-                    res.status(200).json(dataToSend);
-                }
-                else {
-                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-                }
-            });
-        }
-        else if (dataType == 'min') {
-            const movies = movie_1.Movie.find()
-                .select({
-                _id: 1,
-                movieDbId: 1,
-                release_date: 1,
-                en: {
-                    title: 1,
-                    poster_path: 1,
-                },
-                fr: {
-                    title: 1,
-                    poster_path: 1,
-                },
-                it: {
-                    title: 1,
-                    poster_path: 1,
-                },
-                nl: {
-                    title: 1,
-                    poster_path: 1,
-                },
-            })
-                .skip(page * size)
-                .limit(size)
-                .exec((err, movies) => {
-                if (err) {
-                    res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-                }
-                else if (movies) {
-                    dataToSend.movies = movies;
-                    res.status(200).json(dataToSend);
-                }
-            });
-        }
-        else {
-            res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'data' });
-        }
+    if (typeof dataType != 'undefined' && dataType == 'full') {
+        const movies = movie_1.Movie.find()
+            .skip(pageInt * sizeInt)
+            .limit(sizeInt)
+            .exec((err, movies) => {
+            if (movies) {
+                dataToSend.movies = movies;
+                res.status(200).json(dataToSend);
+            }
+            else {
+                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+            }
+        });
+    }
+    else if (dataType == 'admin') {
+        const movies = movie_1.Movie.find()
+            .select({
+            release_date: 1,
+            vote_average: 1,
+            director: 1,
+            en: {
+                title: 1,
+                overview: 1,
+            },
+            fr: {
+                title: 1,
+                overview: 1,
+            },
+            it: {
+                title: 1,
+                overview: 1,
+            },
+            nl: {
+                title: 1,
+                overview: 1,
+            },
+        })
+            .skip(pageInt * sizeInt)
+            .limit(sizeInt)
+            .exec((err, movies) => {
+            if (movies) {
+                dataToSend.movies = movies;
+                res.status(200).json(dataToSend);
+            }
+            else {
+                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+            }
+        });
+    }
+    else if (dataType == 'min') {
+        const movies = movie_1.Movie.find()
+            .select({
+            _id: 1,
+            movieDbId: 1,
+            release_date: 1,
+            en: {
+                title: 1,
+                poster_path: 1,
+            },
+            fr: {
+                title: 1,
+                poster_path: 1,
+            },
+            it: {
+                title: 1,
+                poster_path: 1,
+            },
+            nl: {
+                title: 1,
+                poster_path: 1,
+            },
+        })
+            .skip(pageInt * sizeInt)
+            .limit(sizeInt)
+            .exec((err, movies) => {
+            if (err) {
+                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+            }
+            else if (movies) {
+                dataToSend.movies = movies;
+                res.status(200).json(dataToSend);
+            }
+        });
     }
     else {
-        res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'page_size' });
+        res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'data' });
     }
 };
 exports.getMovies = getMovies;
@@ -132,7 +154,9 @@ exports.addMovie = addMovie;
 const getMovieById = async (req, res, next) => {
     const movies = movie_1.Movie.findOne({ _id: req._id }, (err, movie) => {
         if (err) {
-            res.status(404).send({ message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'movie' });
+            res.status(404).send({
+                message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'movie',
+            });
         }
         else if (movie) {
             res.status(200).json(movie);
@@ -159,7 +183,9 @@ exports.updateMovieById = updateMovieById;
 const deleteMovieById = async (req, res, next) => {
     const movies = movie_1.Movie.findOne({ _id: req._id }, (err, movie) => {
         if (err) {
-            res.status(404).send({ message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'movie' });
+            res.status(404).send({
+                message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'movie',
+            });
         }
         else if (movie) {
             // Remove movie if movie in favorite and/or rate of a user

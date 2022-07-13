@@ -7,6 +7,7 @@ declare global {
             API_URL: string;
             API_TOKEN: string;
             LANGUAGES: string[];
+            REQUEST_TYPES: string[];
             FRONT_URL: string;
         }
     }

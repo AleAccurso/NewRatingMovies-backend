@@ -1,10 +1,9 @@
 import { RequestHandler } from 'express';
 import dotenv from 'dotenv';
 
-import { MongoError } from 'mongodb';
 import { msg } from '../contants/responseMessages';
 
-import console from "console"
+import console from 'console';
 
 import { exec } from 'child_process';
 import IMovie from '../models/movie';
@@ -13,16 +12,46 @@ import { Movie } from '../schema/movie';
 import { User } from '../schema/user';
 import MoviePagingDTO from '../dto/moviePagingDTO';
 import UserReqUpdateDTO from '../dto/userReqUpdateDTO';
-
+import { parseToInt } from '../utils/parseToInt';
+import { requestType } from '../types/requestType';
 
 dotenv.config();
 
 //get movies
 export const getMovies: RequestHandler = async (req, res, next) => {
+    let pageInt: number = -1;
 
-    const page = req?._page;
-    const size = req?._size;
-    const dataType = req.query.data;
+    if (req && req.query && req.query.page) {
+        const parseResult = parseToInt(req.query.page as string);
+
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: msg.BAD_PARAMS + req.query.page });
+        } else {
+            pageInt = parseResult.parsedInt;
+        }
+    }
+
+    let sizeInt: number = -1;
+
+    if (req && req.query && req.query.size) {
+        const parseResult = parseToInt(req.query.size as string);
+
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: msg.BAD_PARAMS + req.query.size });
+        } else {
+            sizeInt = parseResult.parsedInt;
+        }
+    }
+
+    let dataType: requestType = "unknown" as requestType;
+
+    if (req && req.query && req.query.data) {
+        if (process.env.REQUEST_TYPES.includes(req.query.data as string)) {
+            dataType = req.query.data as requestType;
+        } else {
+            res.status(400).json({ message: msg.BAD_PARAMS + req.query.data });
+        }
+    }
 
     const totalNbMovies = await Movie.countDocuments({});
 
@@ -30,90 +59,86 @@ export const getMovies: RequestHandler = async (req, res, next) => {
         nbMovies: totalNbMovies,
     };
 
-    if (typeof page != "undefined" && typeof size != "undefined") {
-        if (dataType == 'full') {
-            const movies = Movie.find()
-                .skip(page * size)
-                .limit(size)
-                .exec((err, movies) => {
-                    if (movies) {
-                        dataToSend.movies = movies;
-                        res.status(200).json(dataToSend);
-                    } else {
-                        res.status(500).send({ message: msg.SERVER_ERROR });
-                    }
-                });
-        } else if (dataType == 'admin') {
-            const movies = Movie.find()
-                .select({
-                    release_date: 1,
-                    vote_average: 1,
-                    director: 1,
-                    en: {
-                        title: 1,
-                        overview: 1,
-                    },
-                    fr: {
-                        title: 1,
-                        overview: 1,
-                    },
-                    it: {
-                        title: 1,
-                        overview: 1,
-                    },
-                    nl: {
-                        title: 1,
-                        overview: 1,
-                    },
-                })
-                .skip(page * size)
-                .limit(size)
-                .exec((err, movies) => {
-                    if (movies) {
-                        dataToSend.movies = movies;
-                        res.status(200).json(dataToSend);
-                    } else {
-                        res.status(500).send({ message: msg.SERVER_ERROR });
-                    }
-                });
-        } else if (dataType == 'min') {
-            const movies = Movie.find()
-                .select({
-                    _id: 1,
-                    movieDbId: 1,
-                    release_date: 1,
-                    en: {
-                        title: 1,
-                        poster_path: 1,
-                    },
-                    fr: {
-                        title: 1,
-                        poster_path: 1,
-                    },
-                    it: {
-                        title: 1,
-                        poster_path: 1,
-                    },
-                    nl: {
-                        title: 1,
-                        poster_path: 1,
-                    },
-                })
-                .skip(page * size)
-                .limit(size)
-                .exec((err, movies) => {
-                    if (err) {
-                        res.status(500).send({ message: msg.SERVER_ERROR });
-                    } else if (movies) {
-                        dataToSend.movies = movies;
-                        res.status(200).json(dataToSend);
-                    }
-                });
-        } else {
-            res.status(400).json({ message: msg.BAD_PARAMS + 'data' });
-        }
+    if (typeof dataType != 'undefined' && dataType == 'full') {
+        const movies = Movie.find()
+            .skip(pageInt * sizeInt)
+            .limit(sizeInt)
+            .exec((err, movies) => {
+                if (movies) {
+                    dataToSend.movies = movies;
+                    res.status(200).json(dataToSend);
+                } else {
+                    res.status(500).send({ message: msg.SERVER_ERROR });
+                }
+            });
+    } else if (dataType == 'admin') {
+        const movies = Movie.find()
+            .select({
+                release_date: 1,
+                vote_average: 1,
+                director: 1,
+                en: {
+                    title: 1,
+                    overview: 1,
+                },
+                fr: {
+                    title: 1,
+                    overview: 1,
+                },
+                it: {
+                    title: 1,
+                    overview: 1,
+                },
+                nl: {
+                    title: 1,
+                    overview: 1,
+                },
+            })
+            .skip(pageInt * sizeInt)
+            .limit(sizeInt)
+            .exec((err, movies) => {
+                if (movies) {
+                    dataToSend.movies = movies;
+                    res.status(200).json(dataToSend);
+                } else {
+                    res.status(500).send({ message: msg.SERVER_ERROR });
+                }
+            });
+    } else if (dataType == 'min') {
+        const movies = Movie.find()
+            .select({
+                _id: 1,
+                movieDbId: 1,
+                release_date: 1,
+                en: {
+                    title: 1,
+                    poster_path: 1,
+                },
+                fr: {
+                    title: 1,
+                    poster_path: 1,
+                },
+                it: {
+                    title: 1,
+                    poster_path: 1,
+                },
+                nl: {
+                    title: 1,
+                    poster_path: 1,
+                },
+            })
+            .skip(pageInt * sizeInt)
+            .limit(sizeInt)
+            .exec((err, movies) => {
+                if (err) {
+                    res.status(500).send({ message: msg.SERVER_ERROR });
+                } else if (movies) {
+                    dataToSend.movies = movies;
+                    res.status(200).json(dataToSend);
+                }
+            });
     } else {
-        res.status(400).json({ message: msg.BAD_PARAMS + 'page_size' });
+        res.status(400).json({ message: msg.BAD_PARAMS + 'data' });
     }
 };
 
@@ -134,18 +159,23 @@ export const addMovie: RequestHandler = async (req, res, next) => {
 
 //Get movie by its id
 export const getMovieById: RequestHandler = async (req, res, next) => {
-    const movies = Movie.findOne({ _id: req._id }, (err: Error, movie: IMovie) => {
-        if (err) {
-            res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + 'movie' });
-        } else if (movie) {
-            res.status(200).json(movie);
-        }
-    });
+    const movies = Movie.findOne(
+        { _id: req._id },
+        (err: Error, movie: IMovie) => {
+            if (err) {
+                res.status(404).send({
+                    message: msg.RESOURCE_NOT_FOUND + 'movie',
+                });
+            } else if (movie) {
+                res.status(200).json(movie);
+            }
+        },
+    );
 };
 
 //Update a movie
 export const updateMovieById: RequestHandler = async (req, res, next) => {
-    const newData = req.body as UserReqUpdateDTO
+    const newData = req.body as UserReqUpdateDTO;
     const movie = Movie.findOneAndUpdate(
         { _id: req._id },
         {
@@ -164,42 +194,49 @@ export const updateMovieById: RequestHandler = async (req, res, next) => {
 
 //Delete movie from DB
 export const deleteMovieById: RequestHandler = async (req, res, next) => {
-    const movies = Movie.findOne({ _id: req._id }, (err: Error, movie: IMovie) => {
-        if (err) {
-            res.status(404).send({ message: msg.RESOURCE_NOT_FOUND + 'movie' });
-        } else if (movie) {
-            // Remove movie if movie in favorite and/or rate of a user
-            User.find()
-                .cursor()
-                .eachAsync((user: IUser) => {
-                    // Favorites
-                    if (user.myFavorites.includes(movie.movieDbId)) {
-                        const index = user.myFavorites.indexOf(movie.movieDbId);
-                        if (index > -1) {
-                            user.myFavorites.splice(index, 1);
+    const movies = Movie.findOne(
+        { _id: req._id },
+        (err: Error, movie: IMovie) => {
+            if (err) {
+                res.status(404).send({
+                    message: msg.RESOURCE_NOT_FOUND + 'movie',
+                });
+            } else if (movie) {
+                // Remove movie if movie in favorite and/or rate of a user
+                User.find()
+                    .cursor()
+                    .eachAsync((user: IUser) => {
+                        // Favorites
+                        if (user.myFavorites.includes(movie.movieDbId)) {
+                            const index = user.myFavorites.indexOf(
+                                movie.movieDbId,
+                            );
+                            if (index > -1) {
+                                user.myFavorites.splice(index, 1);
+                            }
                         }
-                    }
-                    //Rates
-                    for (let i = 0; i < user.myRates.length; i++) {
-                        if (user.myRates[i].movieDbId == movie.movieDbId) {
-                            user.myRates.splice(i, 1);
+                        //Rates
+                        for (let i = 0; i < user.myRates.length; i++) {
+                            if (user.myRates[i].movieDbId == movie.movieDbId) {
+                                user.myRates.splice(i, 1);
+                            }
                         }
+                    });
+
+                // Remove movie from DB
+                Movie.deleteOne({ id: req._id }, (err) => {
+                    if (err) {
+                        res.status(500).send({ message: msg.SERVER_ERROR });
+                    } else {
+                        res.status(200).json({
+                            message: msg.SUCCESS_ACTION + 'delete_movie',
+                            deletedId: movie._id,
+                        });
                     }
                 });
-
-            // Remove movie from DB
-            Movie.deleteOne({ id: req._id }, (err) => {
-                if (err) {
-                    res.status(500).send({ message: msg.SERVER_ERROR });
-                } else {
-                    res.status(200).json({
-                        message: msg.SUCCESS_ACTION + 'delete_movie',
-                        deletedId: movie._id,
-                    });
-                }
-            });
-        }
-    });
+            }
+        },
+    );
 };
 
 //Change metadata

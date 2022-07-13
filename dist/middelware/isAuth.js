@@ -30,6 +30,7 @@ const isAuth = async (req, res, next) => {
         });
     }
     if (typeof decodedToken != "string") {
+        console.log("🚀 ~ constisAuth:RequestHandler= ~ decodedToken", decodedToken);
         let user = await user_1.User.findOne({ email: decodedToken.email });
         if (user) {
             req._userId = user._id;
