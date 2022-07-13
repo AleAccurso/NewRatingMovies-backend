@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.start = void 0;
-const start = async (app) => {
+exports.run = void 0;
+const run = async (app) => {
     app.listen(process.env.PORT, () => {
         console.log('Server started.');
     });
 };
-exports.start = start;
+exports.run = run;
