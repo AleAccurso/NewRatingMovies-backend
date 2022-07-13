@@ -1,7 +1,7 @@
 import express from 'express';
+import { start } from './server/server';
+import { connectDB } from "./database/database";
 import { json, urlencoded } from 'body-parser';
-
-import { run } from './database/database';
 
 // Manage HTTP requests
 import { errorHelper } from './handlers/ErrorHandler';
@@ -16,8 +16,11 @@ import theMovideDBRouter from './routes/theMovideDBRouter';
 // Create server
 const server = express();
 
+// connect DB
+connectDB();
+
 // HTTP requests setup
-server.use(json);
+server.use(json());
 server.use(urlencoded({ extended: false }));
 server.use(httpHeaders);
 
@@ -27,7 +30,7 @@ server.use('/api/movies/', movieRouter);
 server.use('/api/users/', userRouter);
 server.use('/api/the-movie-db/', theMovideDBRouter);
 
-// server.use(errorHelper);
+server.use(errorHelper);
 
 // Connect to db and run server
-run(server);
+start(server);
