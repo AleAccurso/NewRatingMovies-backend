@@ -1,2 +1,8 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+// import { language } from "../types/language";
+// export default interface movieAPIResDTO {
+//     nickname: string,
+//     email: string,
+//     password: string,
+//     language: language
+// }

@@ -1,9 +1,8 @@
 import { LanguagesEnum } from '../enums/languages';
-import { language } from '../types/language';
 
-export function ToLanguage(str: string): language {
+export function ToLanguage(str: string): LanguagesEnum {
     if (Object.values(LanguagesEnum).includes(str as unknown as LanguagesEnum)) {
-        return str as language;
+        return str as LanguagesEnum;
     } else {
         return LanguagesEnum.UNKNOWN;
     }

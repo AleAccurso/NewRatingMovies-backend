@@ -1,10 +1,9 @@
 import { RequestTypeEnum } from '../enums/requestType';
-import { requestType } from '../types/requestType';
 
-export function ToRequestType(str: string): requestType {
+export function ToRequestType(str: string): RequestTypeEnum {
 
     if (Object.values(RequestTypeEnum).includes(str as RequestTypeEnum)) {
-        return str as requestType;
+        return str as RequestTypeEnum;
     } else {
         return RequestTypeEnum.UNKNOWN
     }

@@ -1,6 +1,9 @@
 import IMovie from "../models/movie";
 
 export default interface MoviePagingDTO {
-    nbMovies: number,
-    movies?: IMovie[],
+    page: number,
+    size: number,
+    nbPages?: number,
+    nbResults?: number,
+    data?: IMovie[],
 }

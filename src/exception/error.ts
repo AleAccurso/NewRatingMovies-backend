@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
+import { HttpCode } from "../enums/httpCode";
 
 interface Error {
-    status: number;
+    status: HttpCode;
     message: string;
-    data?: object;
 }
 
 export const errorHelper = async (
@@ -14,6 +14,5 @@ export const errorHelper = async (
 ) => {
     const status = error.status || 500;
     const message = error.message || 'Internal server error';
-    const data = error?.data;
-    res.status(status).json({ message: message, data: data });
+    res.status(status).json({ message: message });
 };

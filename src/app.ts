@@ -2,7 +2,7 @@ import express from 'express';
 import { json, urlencoded } from 'body-parser';
 
 // Manage HTTP requests
-import { errorHelper } from './middelware/error';
+import { errorHelper } from './exception/error';
 import { httpHeaders } from './config/httpHeaders';
 
 // routes

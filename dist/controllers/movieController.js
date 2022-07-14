@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10,9 +33,11 @@ const console_1 = __importDefault(require("console"));
 const child_process_1 = require("child_process");
 const movie_1 = require("../schema/movie");
 const user_1 = require("../schema/user");
+const MovieUseCase = __importStar(require("../usecases/movie"));
 const parseToInt_1 = require("../utils/parseToInt");
 const requestType_1 = require("../enums/requestType");
 const parseToRequestType_1 = require("../utils/parseToRequestType");
+const httpCode_1 = require("../enums/httpCode");
 dotenv_1.default.config();
 //get movies
 const getMovies = async (req, res, next) => {
@@ -36,103 +61,22 @@ const getMovies = async (req, res, next) => {
             sizeInt = parseResult.parsedInt;
         }
     }
-    let dataType = requestType_1.RequestTypeEnum.UNKNOWN;
+    let requestType = requestType_1.RequestTypeEnum.UNKNOWN;
     if (req && req.query && req.query.data) {
         const parseData = (0, parseToRequestType_1.ToRequestType)(req.query.data);
         if (parseData === requestType_1.RequestTypeEnum.UNKNOWN) {
             res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + req.query.data });
         }
         else {
-            dataType = parseData;
+            requestType = parseData;
         }
     }
-    const totalNbMovies = await movie_1.Movie.countDocuments({});
-    let dataToSend = {
-        nbMovies: totalNbMovies,
-    };
-    if (dataType == requestType_1.RequestTypeEnum.FULL) {
-        const movies = movie_1.Movie.find()
-            .skip(pageInt * sizeInt)
-            .limit(sizeInt)
-            .exec((err, movies) => {
-            if (movies) {
-                dataToSend.movies = movies;
-                res.status(200).json(dataToSend);
-            }
-            else {
-                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-            }
-        });
+    const MoviePagingDTO = MovieUseCase.getMovies(pageInt, sizeInt, requestType);
+    if ((await MoviePagingDTO).movies) {
+        res.status(httpCode_1.HttpCode.OK).json(MoviePagingDTO);
     }
-    else if (dataType == requestType_1.RequestTypeEnum.ADMIN) {
-        const movies = movie_1.Movie.find()
-            .select({
-            release_date: 1,
-            vote_average: 1,
-            director: 1,
-            en: {
-                title: 1,
-                overview: 1,
-            },
-            fr: {
-                title: 1,
-                overview: 1,
-            },
-            it: {
-                title: 1,
-                overview: 1,
-            },
-            nl: {
-                title: 1,
-                overview: 1,
-            },
-        })
-            .skip(pageInt * sizeInt)
-            .limit(sizeInt)
-            .exec((err, movies) => {
-            if (movies) {
-                dataToSend.movies = movies;
-                res.status(200).json(dataToSend);
-            }
-            else {
-                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-            }
-        });
-    }
-    else if (dataType == requestType_1.RequestTypeEnum.MINIMUM) {
-        const movies = movie_1.Movie.find()
-            .select({
-            _id: 1,
-            movieDbId: 1,
-            release_date: 1,
-            en: {
-                title: 1,
-                poster_path: 1,
-            },
-            fr: {
-                title: 1,
-                poster_path: 1,
-            },
-            it: {
-                title: 1,
-                poster_path: 1,
-            },
-            nl: {
-                title: 1,
-                poster_path: 1,
-            },
-        })
-            .skip(pageInt * sizeInt)
-            .limit(sizeInt)
-            .exec((err, movies) => {
-            if (err) {
-                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
-            }
-            else if (movies) {
-                dataToSend.movies = movies;
-                res.status(200).json(dataToSend);
-            }
-        });
+    else {
+        res.status(httpCode_1.HttpCode.NO_CONTENT).json();
     }
 };
 exports.getMovies = getMovies;

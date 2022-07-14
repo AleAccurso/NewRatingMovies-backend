@@ -1,8 +1,8 @@
-import { language } from "../types/language";
+// import { language } from "../types/language";
 
-export default interface movieAPIResDTO {
-    nickname: string,
-    email: string,
-    password: string,
-    language: language
-}
+// export default interface movieAPIResDTO {
+//     nickname: string,
+//     email: string,
+//     password: string,
+//     language: language
+// }

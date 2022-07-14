@@ -4,23 +4,25 @@ import dotenv from 'dotenv';
 import { msg } from '../contants/responseMessages';
 
 import console from 'console';
-
 import { exec } from 'child_process';
+
 import IMovie from '../models/movie';
 import IUser from '../models/user';
 import { Movie } from '../schema/movie';
 import { User } from '../schema/user';
-import MoviePagingDTO from '../dto/moviePagingDTO';
+import * as MovieUseCase from '../usecases/movie'
+
 import UserReqUpdateDTO from '../dto/userReqUpdateDTO';
 import { parseToInt } from '../utils/parseToInt';
 import { RequestTypeEnum } from '../enums/requestType';
 import { ToRequestType } from '../utils/parseToRequestType';
-import { requestType } from '../types/requestType';
+import MoviePagingDTO from '../dto/moviePagingDTO';
+import { HttpCode } from '../enums/httpCode';
 
 dotenv.config();
 
 //get movies
-export const getMovies: RequestHandler = async (req, res, next) => {
+export const getMovies: RequestHandler = async (req, res, next): MoviePagingDTO => {
     let pageInt: number = -1;
 
     if (req && req.query && req.query.page) {
@@ -45,102 +47,24 @@ export const getMovies: RequestHandler = async (req, res, next) => {
         }
     }
 
-    let dataType: requestType = RequestTypeEnum.UNKNOWN;
+    let requestType = RequestTypeEnum.UNKNOWN;
 
     if (req && req.query && req.query.data) {
         const parseData = ToRequestType(req.query.data as string)
 
-        if (parseData === RequestTypeEnum.UNKNOWN as requestType) {
+        if (parseData === RequestTypeEnum.UNKNOWN) {
             res.status(400).json({ message: msg.BAD_PARAMS + req.query.data });
         } else {
-            dataType = parseData;
+            requestType = parseData;
         }
     }
 
-    const totalNbMovies = await Movie.countDocuments({});
+    const MoviePagingDTO = MovieUseCase.getMovies(pageInt, sizeInt, requestType)
 
-    let dataToSend: MoviePagingDTO = {
-        nbMovies: totalNbMovies,
-    };
-
-    if (dataType == RequestTypeEnum.FULL) {
-        const movies = Movie.find()
-            .skip(pageInt * sizeInt)
-            .limit(sizeInt)
-            .exec((err, movies) => {
-                if (movies) {
-                    dataToSend.movies = movies;
-                    res.status(200).json(dataToSend);
-                } else {
-                    res.status(500).send({ message: msg.SERVER_ERROR });
-                }
-            });
-    } else if (dataType == RequestTypeEnum.ADMIN) {
-        const movies = Movie.find()
-            .select({
-                release_date: 1,
-                vote_average: 1,
-                director: 1,
-                en: {
-                    title: 1,
-                    overview: 1,
-                },
-                fr: {
-                    title: 1,
-                    overview: 1,
-                },
-                it: {
-                    title: 1,
-                    overview: 1,
-                },
-                nl: {
-                    title: 1,
-                    overview: 1,
-                },
-            })
-            .skip(pageInt * sizeInt)
-            .limit(sizeInt)
-            .exec((err, movies) => {
-                if (movies) {
-                    dataToSend.movies = movies;
-                    res.status(200).json(dataToSend);
-                } else {
-                    res.status(500).send({ message: msg.SERVER_ERROR });
-                }
-            });
-    } else if (dataType == RequestTypeEnum.MINIMUM) {
-        const movies = Movie.find()
-            .select({
-                _id: 1,
-                movieDbId: 1,
-                release_date: 1,
-                en: {
-                    title: 1,
-                    poster_path: 1,
-                },
-                fr: {
-                    title: 1,
-                    poster_path: 1,
-                },
-                it: {
-                    title: 1,
-                    poster_path: 1,
-                },
-                nl: {
-                    title: 1,
-                    poster_path: 1,
-                },
-            })
-            .skip(pageInt * sizeInt)
-            .limit(sizeInt)
-            .exec((err, movies) => {
-                if (err) {
-                    res.status(500).send({ message: msg.SERVER_ERROR });
-                } else if (movies) {
-                    dataToSend.movies = movies;
-                    res.status(200).json(dataToSend);
-                }
-            });
+    if ((await MoviePagingDTO).movies) {
+        res.status(HttpCode.OK).json(MoviePagingDTO)
+    } else {
+        res.status(HttpCode.NO_CONTENT).json();
     }
 };
 

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = require("body-parser");
 // Manage HTTP requests
-const error_1 = require("./middelware/error");
+const error_1 = require("./exception/error");
 const httpHeaders_1 = require("./config/httpHeaders");
 // routes
 const userRouter_1 = __importDefault(require("./routes/userRouter"));
