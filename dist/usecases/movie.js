@@ -29,31 +29,35 @@ const MovieRepository = __importStar(require("../repositories/movies"));
 const getMovies = async (page, size, data) => {
     try {
         let moviePagingDTO = { page: page, size: size };
-        const countResponse = await MovieRepository.CountMovies();
-        if (countResponse.count) {
-            moviePagingDTO.nbResults = countResponse.count;
-            moviePagingDTO.nbPages = Math.ceil(countResponse.count / size);
-        }
+        const count = await MovieRepository.CountMovies();
+        moviePagingDTO.nbResults = count;
+        moviePagingDTO.nbPages = Math.ceil(count / size);
         switch (data) {
             case requestType_1.RequestTypeEnum.FULL:
-                const responseFull = await MovieRepository.GetMoviesFull(page, size);
-                if (responseFull.movies) {
-                    moviePagingDTO.data = responseFull.data;
+                const moviesFull = await MovieRepository.GetMoviesFull(page, size);
+                if (moviesFull) {
+                    moviePagingDTO.data = moviesFull;
                 }
+                break;
             case requestType_1.RequestTypeEnum.ADMIN:
-                const responseAdmin = await MovieRepository.GetMoviesAdmin(page, size);
-                if (responseAdmin.movies) {
-                    moviePagingDTO.data = responseAdmin.movies;
+                const moviesAdmin = await MovieRepository.GetMoviesAdmin(page, size);
+                if (moviesAdmin) {
+                    moviePagingDTO.data = moviesAdmin;
                 }
+                break;
             case requestType_1.RequestTypeEnum.MINIMUM:
-                const responseMinimum = await MovieRepository.GetMoviesAdmin(page, size);
-                if (responseMinimum.movies) {
-                    moviePagingDTO.data = responseMinimum.movies;
+                const moviesMinimum = await MovieRepository.GetMoviesAdmin(page, size);
+                if (moviesMinimum) {
+                    moviePagingDTO.data = moviesMinimum;
                 }
+                break;
+            default:
+                moviePagingDTO.data = [];
         }
         return moviePagingDTO;
     }
-    catch (error) {
+    catch (err) {
+        throw err;
     }
 };
 exports.getMovies = getMovies;

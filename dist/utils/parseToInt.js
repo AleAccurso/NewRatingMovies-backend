@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseToInt = void 0;
-const responseMessages_1 = require("../contants/responseMessages");
+const constants_1 = require("../contants/constants");
 const parseToInt = (str) => {
     const tempInt = Number(str);
     let parsedInt = undefined;
@@ -10,7 +10,7 @@ const parseToInt = (str) => {
         parsedInt = tempInt;
     }
     else {
-        error = new Error(responseMessages_1.msg.BAD_PARAMS + str);
+        error = new Error(constants_1.msg.BAD_PARAMS + str);
     }
     return { parsedInt: parsedInt, error: error };
 };

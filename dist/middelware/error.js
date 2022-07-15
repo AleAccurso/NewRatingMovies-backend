@@ -1,9 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorHelper = void 0;
-const errorHelper = async (error, req, res, next) => {
+function sendError(error, request, response, next) {
     const status = error.status || 500;
-    const message = error.message || 'Internal server error';
-    res.status(status).json({ message: message });
-};
-exports.errorHelper = errorHelper;
+    const message = error.message || 'Something went wrong';
+    response
+        .status(status)
+        .send({
+        status,
+        message,
+    });
+}
+exports.default = sendError;

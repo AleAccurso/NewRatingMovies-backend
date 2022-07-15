@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateUserFavorite = exports.getUserFavorites = exports.updateUserRate = exports.deleteUserById = exports.updateUserById = exports.getUserById = exports.getUsers = void 0;
 const user_1 = require("../schema/user");
 const movie_1 = require("../schema/movie");
-const responseMessages_1 = require("../contants/responseMessages");
+const constants_1 = require("../contants/constants");
 const userPicController_1 = require("./userPicController");
 const util_1 = __importDefault(require("util"));
 const mongodb_1 = require("mongodb");
@@ -27,7 +27,7 @@ const getUsers = async (req, res, next) => {
             .limit(size)
             .exec((err, users) => {
             if (err) {
-                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+                res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
             }
             else if (users) {
                 res.status(200).json(users);
@@ -35,7 +35,7 @@ const getUsers = async (req, res, next) => {
         });
     }
     else {
-        res.status(400).json({ message: responseMessages_1.msg.BAD_PARAMS + 'page_size' });
+        res.status(400).json({ message: constants_1.msg.BAD_PARAMS + 'page_size' });
     }
 };
 exports.getUsers = getUsers;
@@ -47,7 +47,7 @@ const getUserById = async (req, res, next) => {
         const user = user_1.User.findOne({ _id: req._id }, (err, user) => {
             if (err) {
                 res.status(404).send({
-                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'user',
+                    message: constants_1.msg.RESOURCE_NOT_FOUND + 'user',
                 });
             }
             else if (user) {
@@ -56,7 +56,7 @@ const getUserById = async (req, res, next) => {
         });
     }
     else {
-        res.status(403).send({ message: responseMessages_1.authMsg.UNAUTHORIZED });
+        res.status(403).send({ message: constants_1.authMsg.UNAUTHORIZED });
     }
 };
 exports.getUserById = getUserById;
@@ -90,7 +90,7 @@ const updateUserById = async (req, res, next) => {
             ...body,
         }, null, (err) => {
             if (err) {
-                res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+                res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
             }
             else {
                 res.status(200).json(req.body);
@@ -98,7 +98,7 @@ const updateUserById = async (req, res, next) => {
         });
     }
     else {
-        res.status(403).send({ message: responseMessages_1.authMsg.UNAUTHORIZED });
+        res.status(403).send({ message: constants_1.authMsg.UNAUTHORIZED });
     }
 };
 exports.updateUserById = updateUserById;
@@ -110,17 +110,17 @@ const deleteUserById = async (req, res, next) => {
         const user = user_1.User.findOne({ _id: req._id }, (err, user) => {
             if (err) {
                 res.status(404).send({
-                    message: responseMessages_1.msg.RESOURCE_NOT_FOUND + 'user',
+                    message: constants_1.msg.RESOURCE_NOT_FOUND + 'user',
                 });
             }
             else if (user) {
                 user_1.User.deleteOne({ _id: req.params.id }, (err) => {
                     if (err) {
-                        res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+                        res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
                     }
                     else {
                         res.status(200).json({
-                            message: responseMessages_1.msg.SUCCESS_ACTION + 'delete_user',
+                            message: constants_1.msg.SUCCESS_ACTION + 'delete_user',
                         });
                     }
                 });
@@ -128,7 +128,7 @@ const deleteUserById = async (req, res, next) => {
         });
     }
     else {
-        res.status(403).send({ message: responseMessages_1.authMsg.UNAUTHORIZED });
+        res.status(403).send({ message: constants_1.authMsg.UNAUTHORIZED });
     }
 };
 exports.deleteUserById = deleteUserById;
@@ -136,7 +136,7 @@ exports.deleteUserById = deleteUserById;
 const updateUserRate = async (req, res, next) => {
     const user = user_1.User.findOne({ _id: req._id }, null, (err, user) => {
         if (err) {
-            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+            res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
         }
         else if (user) {
             let userChanged = false;
@@ -206,7 +206,7 @@ const updateUserFavorite = async (req, res, next) => {
     const id = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.id;
     const user = user_1.User.findOne({ _id: new mongodb_1.ObjectId(id) }, (err, user) => {
         if (err) {
-            res.status(500).send({ message: responseMessages_1.msg.SERVER_ERROR });
+            res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
         }
         else if (user && req._movieDbId) {
             let index = user.myFavorites.indexOf(req._movieDbId);

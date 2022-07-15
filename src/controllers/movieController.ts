@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import dotenv from 'dotenv';
 
-import { msg } from '../contants/responseMessages';
+import { msg } from '../contants/constants';
 
 import console from 'console';
 import { exec } from 'child_process';
@@ -18,53 +18,67 @@ import { RequestTypeEnum } from '../enums/requestType';
 import { ToRequestType } from '../utils/parseToRequestType';
 import MoviePagingDTO from '../dto/moviePagingDTO';
 import { HttpCode } from '../enums/httpCode';
+import HttpException from '../exceptions/httpException';
+import sendError from '../middelware/error';
 
 dotenv.config();
 
 //get movies
-export const getMovies: RequestHandler = async (req, res, next): MoviePagingDTO => {
-    let pageInt: number = -1;
-
-    if (req && req.query && req.query.page) {
-        const parseResult = parseToInt(req.query.page as string);
-
-        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-            res.status(400).json({ message: parseResult.error });
-        } else {
-            pageInt = parseResult.parsedInt;
+export const getMovies: RequestHandler = async(req, res, next) => {
+    try {
+        let pageInt: number = -1;
+    
+        if (req && req.query && req.query.page) {
+            const parseResult = parseToInt(req.query.page as string);
+    
+            if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+                res.status(400).json({ message: parseResult.error });
+            } else {
+                pageInt = parseResult.parsedInt;
+            }
         }
-    }
-
-    let sizeInt: number = -1;
-
-    if (req && req.query && req.query.size) {
-        const parseResult = parseToInt(req.query.size as string);
-
-        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-            res.status(400).json({ message: parseResult.error });
-        } else {
-            sizeInt = parseResult.parsedInt;
+    
+        let sizeInt: number = -1;
+    
+        if (req && req.query && req.query.size) {
+            const parseResult = parseToInt(req.query.size as string);
+    
+            if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+                res.status(400).json({ message: parseResult.error });
+            } else {
+                sizeInt = parseResult.parsedInt;
+            }
         }
-    }
-
-    let requestType = RequestTypeEnum.UNKNOWN;
-
-    if (req && req.query && req.query.data) {
-        const parseData = ToRequestType(req.query.data as string)
-
-        if (parseData === RequestTypeEnum.UNKNOWN) {
-            res.status(400).json({ message: msg.BAD_PARAMS + req.query.data });
-        } else {
-            requestType = parseData;
+    
+        if (pageInt < 0 || sizeInt < 0 ) {
+            pageInt = 0;
+            sizeInt = 0;
         }
-    }
+    
+        let requestType = RequestTypeEnum.UNKNOWN;
+    
+        if (req && req.query && req.query.data) {
+            const parseData = ToRequestType(req.query.data as string)
+    
+            if (parseData === RequestTypeEnum.UNKNOWN) {
+                res.status(400).json({ message: msg.BAD_PARAMS + req.query.data });
+            } else {
+                requestType = parseData;
+            }
+        }
+    
+        const MoviePagingDTO = MovieUseCase.getMovies(pageInt, sizeInt, requestType)
+    
+        const done = new Promise((resolve, reject) => {
+            if (MoviePagingDTO) {
+                return Promise.resolve(MoviePagingDTO)
+            } else {
+                return Promise.reject()
+            }
 
-    const MoviePagingDTO = MovieUseCase.getMovies(pageInt, sizeInt, requestType)
-
-    if ((await MoviePagingDTO).movies) {
-        res.status(HttpCode.OK).json(MoviePagingDTO)
-    } else {
-        res.status(HttpCode.NO_CONTENT).json();
+        })
+    } catch (error) {
+        sendError(error as HttpException, req, res, next)
     }
 };
 
@@ -85,6 +99,8 @@ export const addMovie: RequestHandler = async (req, res, next) => {
 
 //Get movie by its id
 export const getMovieById: RequestHandler = async (req, res, next) => {
+
+    
     const movies = Movie.findOne(
         { _id: req._id },
         (err: Error, movie: IMovie) => {

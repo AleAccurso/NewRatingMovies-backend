@@ -1,33 +1,34 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CountMovies = exports.GetMoviesMinimum = exports.GetMoviesAdmin = exports.GetMoviesFull = void 0;
-const responseMessages_1 = require("../contants/responseMessages");
+const constants_1 = require("../contants/constants");
 const movie_1 = require("../schema/movie");
 const mongodb_1 = require("mongodb");
+const httpException_1 = __importDefault(require("../exceptions/httpException"));
+const httpCode_1 = require("../enums/httpCode");
 const GetMoviesFull = async (page, size) => {
     try {
-        let response = await movie_1.Movie.find()
+        return await movie_1.Movie.find()
             .skip(page * size)
             .limit(size)
             .exec();
-        if (response) {
-            return response;
-        }
-        else {
-            throw new Error(responseMessages_1.msg.RESOURCE_NOT_FOUND + "movies");
-        }
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
-            // A MongoError
-            throw new Error(responseMessages_1.msg.SERVER_ERROR);
+            throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
+        }
+        else {
+            throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
 exports.GetMoviesFull = GetMoviesFull;
 const GetMoviesAdmin = async (page, size) => {
     try {
-        const response = await movie_1.Movie.find()
+        return await movie_1.Movie.find()
             .select({
             release_date: 1,
             vote_average: 1,
@@ -52,16 +53,20 @@ const GetMoviesAdmin = async (page, size) => {
             .skip(page * size)
             .limit(size)
             .exec();
-        return { movies: response };
     }
     catch (err) {
-        return { error: err };
+        if (err instanceof mongodb_1.MongoError) {
+            throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
+        }
+        else {
+            throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'get_movies');
+        }
     }
 };
 exports.GetMoviesAdmin = GetMoviesAdmin;
 const GetMoviesMinimum = async (page, size) => {
     try {
-        const response = await movie_1.Movie.find()
+        return await movie_1.Movie.find()
             .select({
             _id: 1,
             movieDbId: 1,
@@ -86,20 +91,28 @@ const GetMoviesMinimum = async (page, size) => {
             .skip(page * size)
             .limit(size)
             .exec();
-        return { movies: response };
     }
     catch (err) {
-        return { error: err };
+        if (err instanceof mongodb_1.MongoError) {
+            throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
+        }
+        else {
+            throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'get_movies');
+        }
     }
 };
 exports.GetMoviesMinimum = GetMoviesMinimum;
 const CountMovies = async () => {
     try {
-        const totalNbMovies = await movie_1.Movie.countDocuments({});
-        return { count: totalNbMovies };
+        return await movie_1.Movie.countDocuments({});
     }
     catch (err) {
-        return { error: err };
+        if (err instanceof mongodb_1.MongoError) {
+            throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
+        }
+        else {
+            throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'count_movies');
+        }
     }
 };
 exports.CountMovies = CountMovies;

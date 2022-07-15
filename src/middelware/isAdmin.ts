@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { authMsg, msg } from '../contants/responseMessages';
+import { authMsg, msg } from '../contants/constants';
 import { User } from '../schema/user';
 
 export const isAdmin: RequestHandler = async (req, res, next) => {

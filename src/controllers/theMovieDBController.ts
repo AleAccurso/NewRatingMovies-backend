@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import axios from 'axios';
-import { msg } from '../contants/responseMessages';
+import { msg } from '../contants/constants';
 import IMovie from '../models/movie';
 import { Trailer } from '../interfaces/trailer';
 import { MovieInfoAPI } from '../interfaces/movieInfo';

@@ -6,7 +6,7 @@ import { MongoError } from 'mongodb';
 import { User } from '../schema/user';
 import { sign } from 'jsonwebtoken';
 
-import { authMsg, msg } from '../contants/responseMessages';
+import { authMsg, msg } from '../contants/constants';
 import IUser from '../models/user';
 import UserReqCreateDTO from '../dto/userReqCreateDTO';
 

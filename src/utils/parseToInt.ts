@@ -1,4 +1,4 @@
-import { msg } from '../contants/responseMessages';
+import { msg } from '../contants/constants';
 
 type parsedInt = { parsedInt?: number; error?: Error };
 

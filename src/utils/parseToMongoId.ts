@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { msg } from '../contants/responseMessages';
+import { msg } from '../contants/constants';
 
 type parsedId = { parsedId?: ObjectId; error?: Error };
 

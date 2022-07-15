@@ -5,13 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isAuth = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const responseMessages_1 = require("../contants/responseMessages");
+const constants_1 = require("../contants/constants");
 const user_1 = require("../schema/user");
 const isAuth = async (req, res, next) => {
     const authHeader = req.get("Authorization");
     if (!authHeader) {
         return res.status(401).json({
-            message: responseMessages_1.authMsg.NOT_AUTHENTICATED,
+            message: constants_1.authMsg.NOT_AUTHENTICATED,
         });
     }
     const token = authHeader.split(" ")[1];
@@ -26,7 +26,7 @@ const isAuth = async (req, res, next) => {
     }
     if (!decodedToken) {
         return res.status(401).json({
-            message: responseMessages_1.authMsg.NOT_AUTHENTICATED,
+            message: constants_1.authMsg.NOT_AUTHENTICATED,
         });
     }
     if (typeof decodedToken != "string") {

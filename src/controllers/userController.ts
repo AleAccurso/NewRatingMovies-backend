@@ -7,7 +7,7 @@ import { CallbackError, Schema } from 'mongoose';
 import IMovie from '../models/movie';
 import UserReqUpdateDTO from "../dto/userReqUpdateDTO"
 
-import { authMsg, msg } from '../contants/responseMessages';
+import { authMsg, msg } from '../contants/constants';
 import { removeOldPic, uploadPic } from './userPicController';
 
 import util from 'util';

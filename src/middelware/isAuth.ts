@@ -1,6 +1,6 @@
 import { RequestHandler } from "express"; 
 import jwt from "jsonwebtoken";
-import { authMsg } from "../contants/responseMessages";
+import { authMsg } from "../contants/constants";
 import { User } from "../schema/user";
 
 export const isAuth: RequestHandler = async (req, res, next) => {
