@@ -1,17 +1,14 @@
-import { msg } from '../contants/constants';
+import { msg } from 'constants/constants';
 
-type parsedInt = { parsedInt?: number; error?: Error };
+type parsedInt = { parsedInt?: number; error?: string };
 
 export const parseToInt = (str: string): parsedInt => {
-    const tempInt = Number(str);
-    let parsedInt: number | undefined = undefined;
+    const parsedInt = Number(str);
     let error: Error | undefined = undefined;
 
-    if (!isNaN(tempInt) && typeof tempInt != 'undefined') {
-        parsedInt = tempInt;
+    if (!isNaN(parsedInt) && typeof parsedInt != 'undefined') {
+        return { parsedInt: parsedInt } as parsedInt;
     } else {
-        error = new Error(msg.BAD_PARAMS + str);
+        return { error: msg.BAD_PARAMS + str } as parsedInt;
     }
-
-    return { parsedInt: parsedInt, error: error };
 }

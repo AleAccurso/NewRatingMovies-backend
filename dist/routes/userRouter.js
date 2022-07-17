@@ -24,9 +24,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const userController = __importStar(require("../controllers/userController"));
-const isAuth_1 = require("../middelware/isAuth");
-const isAdmin_1 = require("../middelware/isAdmin");
+const userController = __importStar(require("controllers/userController"));
+const isAuth_1 = require("middelwares/isAuth");
+const isAdmin_1 = require("middelwares/isAdmin");
 const router = (0, express_1.Router)();
 //Manage formData for the avatar/profilePic
 const Multer = require("multer");

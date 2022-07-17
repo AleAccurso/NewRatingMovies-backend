@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateUserFavorite = exports.getUserFavorites = exports.updateUserRate = exports.deleteUserById = exports.updateUserById = exports.getUserById = exports.getUsers = void 0;
-const user_1 = require("../schema/user");
-const movie_1 = require("../schema/movie");
-const constants_1 = require("../contants/constants");
+const user_1 = require("schema/user");
+const movie_1 = require("schema/movie");
+const constants_1 = require("constants/constants");
 const userPicController_1 = require("./userPicController");
 const util_1 = __importDefault(require("util"));
 const mongodb_1 = require("mongodb");

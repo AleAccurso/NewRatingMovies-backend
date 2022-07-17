@@ -1,5 +1,5 @@
+import { language } from "types/language";
 import { Document, Model, ObjectId } from "mongoose";
-import { language } from "../types/language";
 
 export default interface IUser extends Document {
     _id: ObjectId,

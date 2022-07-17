@@ -1,7 +1,7 @@
 import { Router } from "express";
-import * as userController from "../controllers/userController";
-import { isAuth} from "../middelware/isAuth";
-import { isAdmin } from "../middelware/isAdmin"
+import * as userController from "controllers/userController";
+import { isAuth} from "middelwares/isAuth";
+import { isAdmin } from "middelwares/isAdmin"
 
 const router = Router();
 

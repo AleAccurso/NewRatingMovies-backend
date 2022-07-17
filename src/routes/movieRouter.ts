@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { isAdmin } from "../middelware/isAdmin";
-import * as movieController from "../controllers/movieController";
+import { isAdmin } from "middelwares/isAdmin";
+import * as movieController from "controllers/movieController";
 
 const router = Router();
 

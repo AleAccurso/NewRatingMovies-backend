@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLoggedUser = exports.logout = exports.login = exports.register = void 0;
 const bcryptjs_1 = require("bcryptjs");
 const mongodb_1 = require("mongodb");
-const user_1 = require("../schema/user");
+const user_1 = require("schema/user");
 const jsonwebtoken_1 = require("jsonwebtoken");
-const constants_1 = require("../contants/constants");
+const constants_1 = require("constants/constants");
 const register = async (req, res, next) => {
     const { nickname, email, password, language } = req.body;
     try {

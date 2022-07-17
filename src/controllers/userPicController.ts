@@ -1,12 +1,12 @@
 import { RequestHandler } from 'express';
-import { User } from "../schema/user";
+import { User } from "schema/user";
 
 import path from 'path';
 import { Storage } from "@google-cloud/storage";
-import { FileRequest } from '../interfaces/file';
+import { FileRequest } from 'interfaces/file';
 
 const gc = new Storage({
-    keyFilename: path.join(__dirname, '../google-credentials.json'),
+    keyFilename: path.join(__dirname, '@google-credentials.json'),
     projectId: 'my-project-1623954720104',
 });
 

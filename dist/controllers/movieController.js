@@ -27,18 +27,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isInDB = exports.updateMetaData = exports.deleteMovieById = exports.updateMovieById = exports.getMovieById = exports.addMovie = exports.getMovies = void 0;
-const dotenv_1 = __importDefault(require("dotenv"));
-const constants_1 = require("../contants/constants");
 const console_1 = __importDefault(require("console"));
 const child_process_1 = require("child_process");
-const movie_1 = require("../schema/movie");
-const user_1 = require("../schema/user");
-const MovieUseCase = __importStar(require("../usecases/movie"));
-const parseToInt_1 = require("../utils/parseToInt");
-const requestType_1 = require("../enums/requestType");
-const parseToRequestType_1 = require("../utils/parseToRequestType");
-const error_1 = __importDefault(require("../middelware/error"));
-dotenv_1.default.config();
+const constants_1 = require("constants/constants");
+const httpCode_1 = require("enums/httpCode");
+const requestType_1 = require("enums/requestType");
+const movie_1 = require("schema/movie");
+const user_1 = require("schema/user");
+const MovieUseCase = __importStar(require("usecases/movie"));
+const httpException_1 = __importDefault(require("exceptions/httpException"));
+const error_1 = __importDefault(require("middelwares/error"));
+const parseToRequestType_1 = require("utils/parseToRequestType");
+const parseToInt_1 = require("utils/parseToInt");
+const parseToMongoId_1 = require("utils/parseToMongoId");
 //get movies
 const getMovies = async (req, res, next) => {
     try {
@@ -62,9 +63,9 @@ const getMovies = async (req, res, next) => {
                 sizeInt = parseResult.parsedInt;
             }
         }
-        if (pageInt < 0 || sizeInt < 0) {
+        if (pageInt < 0 || sizeInt < 1) {
             pageInt = 0;
-            sizeInt = 0;
+            sizeInt = 5;
         }
         let requestType = requestType_1.RequestTypeEnum.UNKNOWN;
         if (req && req.query && req.query.data) {
@@ -76,15 +77,14 @@ const getMovies = async (req, res, next) => {
                 requestType = parseData;
             }
         }
-        const MoviePagingDTO = MovieUseCase.getMovies(pageInt, sizeInt, requestType);
-        const done = new Promise((resolve, reject) => {
-            if (MoviePagingDTO) {
-                return Promise.resolve(MoviePagingDTO);
-            }
-            else {
-                return Promise.reject();
-            }
-        });
+        const movies = await MovieUseCase.getMovies(pageInt, sizeInt, requestType);
+        if (typeof movies != 'undefined') {
+            res.status(httpCode_1.HttpCode.OK).json(movies);
+            return Promise.resolve(movies);
+        }
+        else {
+            return Promise.reject([]);
+        }
     }
     catch (error) {
         (0, error_1.default)(error, req, res, next);
@@ -92,7 +92,7 @@ const getMovies = async (req, res, next) => {
 };
 exports.getMovies = getMovies;
 //Add a movie
-const addMovie = async (req, res, next) => {
+const addMovie = (req, res, next) => {
     let movie = new movie_1.Movie({
         ...req.body,
     });
@@ -106,21 +106,32 @@ const addMovie = async (req, res, next) => {
 };
 exports.addMovie = addMovie;
 //Get movie by its id
-const getMovieById = async (req, res, next) => {
-    const movies = movie_1.Movie.findOne({ _id: req._id }, (err, movie) => {
-        if (err) {
-            res.status(404).send({
-                message: constants_1.msg.RESOURCE_NOT_FOUND + 'movie',
+const getMovieById = (req, res, next) => {
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.page);
+        if (!parseResult.parsedId && typeof parseResult.error != 'undefined') {
+            throw new httpException_1.default(httpCode_1.HttpCode.BAD_REQUEST, parseResult.error);
+        }
+        else {
+            const movies = movie_1.Movie.findOne({ _id: parseResult.parsedId }, (err, movie) => {
+                if (err) {
+                    res.status(404).send({
+                        message: constants_1.msg.RESOURCE_NOT_FOUND + 'movie',
+                    });
+                }
+                else if (movie) {
+                    res.status(200).json(movie);
+                }
             });
         }
-        else if (movie) {
-            res.status(200).json(movie);
-        }
-    });
+    }
+    else {
+        throw new httpException_1.default(httpCode_1.HttpCode.BAD_REQUEST, constants_1.msg.MISSING_PARAM + "id");
+    }
 };
 exports.getMovieById = getMovieById;
 //Update a movie
-const updateMovieById = async (req, res, next) => {
+const updateMovieById = (req, res, next) => {
     const newData = req.body;
     const movie = movie_1.Movie.findOneAndUpdate({ _id: req._id }, {
         ...newData,
@@ -135,7 +146,7 @@ const updateMovieById = async (req, res, next) => {
 };
 exports.updateMovieById = updateMovieById;
 //Delete movie from DB
-const deleteMovieById = async (req, res, next) => {
+const deleteMovieById = (req, res, next) => {
     const movies = movie_1.Movie.findOne({ _id: req._id }, (err, movie) => {
         if (err) {
             res.status(404).send({
@@ -178,7 +189,7 @@ const deleteMovieById = async (req, res, next) => {
 };
 exports.deleteMovieById = deleteMovieById;
 //Change metadata
-const updateMetaData = async (req, res, next) => {
+const updateMetaData = (req, res, next) => {
     const job = req.body;
     //Get file extension
     const format = job.format.substring(job.format.indexOf('/') + 1);
@@ -210,7 +221,7 @@ const updateMetaData = async (req, res, next) => {
 };
 exports.updateMetaData = updateMetaData;
 // Checks if a movie with the concerned movieDBId is in DB
-const isInDB = async (req, res, next) => {
+const isInDB = (req, res, next) => {
     const movies = movie_1.Movie.findOne({ movieDbId: req._movieDbId }, (err, movie) => {
         if (err) {
             res.status(404).send({

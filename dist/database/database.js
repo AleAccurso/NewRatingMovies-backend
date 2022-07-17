@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.start = void 0;
 const mongoose_1 = require("mongoose");
-const server_1 = require("../server/server");
+const server_1 = require("server/server");
+const dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
 const start = async (app) => {
     (0, mongoose_1.set)('debug', true);
     // connection.once('open', function () {

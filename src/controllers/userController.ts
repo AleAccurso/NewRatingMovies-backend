@@ -1,19 +1,19 @@
 import { RequestHandler } from 'express';
 
-import { User } from '../schema/user';
-import { Movie } from '../schema/movie';
+import { User } from 'schema/user';
+import { Movie } from 'schema/movie';
 
 import { CallbackError, Schema } from 'mongoose';
-import IMovie from '../models/movie';
-import UserReqUpdateDTO from "../dto/userReqUpdateDTO"
+import IMovie from 'models/movie';
+import UserReqUpdateDTO from "dto/userReqUpdateDTO"
 
-import { authMsg, msg } from '../contants/constants';
+import { authMsg, msg } from 'constants/constants';
 import { removeOldPic, uploadPic } from './userPicController';
 
 import util from 'util';
-import IUser from '../models/user';
+import IUser from 'models/user';
 import { ObjectId } from 'mongodb';
-import { FileRequest } from '../interfaces/file';
+import { FileRequest } from 'interfaces/file';
 
 //Update user - To manage formData
 const Multer = require('multer');

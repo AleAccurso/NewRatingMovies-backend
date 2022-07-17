@@ -1,11 +1,11 @@
 import { RequestHandler } from 'express';
 import axios from 'axios';
-import { msg } from '../contants/constants';
-import IMovie from '../models/movie';
-import { Trailer } from '../interfaces/trailer';
-import { MovieInfoAPI } from '../interfaces/movieInfo';
-import { localMovieInfo } from '../models/movie';
-import { LanguagesEnum } from '../enums/languages';
+import { msg } from 'constants/constants';
+import IMovie from 'models/movie';
+import { Trailer } from 'interfaces/trailer';
+import { MovieInfoAPI } from 'interfaces/movieInfo';
+import { localMovieInfo } from 'models/movie';
+import { LanguagesEnum } from 'enums/languages';
 
 //Get search result from api
 export const getSearchResultsFromAPI: RequestHandler = (req, res, next) => {

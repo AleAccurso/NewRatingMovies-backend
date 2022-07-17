@@ -1,4 +1,4 @@
-import { language } from "../types/language";
+import { language } from "types/language";
 
 export default interface UserReqCreateDTO {
     nickname: string,

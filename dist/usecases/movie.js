@@ -24,11 +24,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMovies = void 0;
-const requestType_1 = require("../enums/requestType");
-const MovieRepository = __importStar(require("../repositories/movies"));
+const requestType_1 = require("enums/requestType");
+const MovieRepository = __importStar(require("repositories/movies"));
 const getMovies = async (page, size, data) => {
     try {
-        let moviePagingDTO = { page: page, size: size };
+        let moviePagingDTO = {
+            page: page,
+            size: size,
+            requestType: data,
+        };
         const count = await MovieRepository.CountMovies();
         moviePagingDTO.nbResults = count;
         moviePagingDTO.nbPages = Math.ceil(count / size);
@@ -46,7 +50,7 @@ const getMovies = async (page, size, data) => {
                 }
                 break;
             case requestType_1.RequestTypeEnum.MINIMUM:
-                const moviesMinimum = await MovieRepository.GetMoviesAdmin(page, size);
+                const moviesMinimum = await MovieRepository.GetMoviesMinimum(page, size);
                 if (moviesMinimum) {
                     moviePagingDTO.data = moviesMinimum;
                 }

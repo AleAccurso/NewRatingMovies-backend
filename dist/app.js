@@ -6,14 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = require("body-parser");
 // Manage HTTP requests
-const httpHeaders_1 = require("./config/httpHeaders");
+const httpHeaders_1 = require("config/httpHeaders");
+const error_1 = __importDefault(require("middelwares/error"));
 // routes
-const userRouter_1 = __importDefault(require("./routes/userRouter"));
-const authRouter_1 = __importDefault(require("./routes/authRouter"));
-const movieRouter_1 = __importDefault(require("./routes/movieRouter"));
-const theMovideDBRouter_1 = __importDefault(require("./routes/theMovideDBRouter"));
-const database_1 = require("./database/database");
-const error_1 = __importDefault(require("./middelware/error"));
+const userRouter_1 = __importDefault(require("routes/userRouter"));
+const authRouter_1 = __importDefault(require("routes/authRouter"));
+const movieRouter_1 = __importDefault(require("routes/movieRouter"));
+const theMovideDBRouter_1 = __importDefault(require("routes/theMovideDBRouter"));
+const database_1 = require("database/database");
 // Create server
 const server = (0, express_1.default)();
 // HTTP requests setup

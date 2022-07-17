@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { HttpCode } from '../enums/httpCode';
+import { HttpCode } from 'enums/httpCode';
 
 class HttpException extends Error {
     status: HttpCode;

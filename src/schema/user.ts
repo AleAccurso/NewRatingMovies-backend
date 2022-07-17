@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
-import IUser from '../models/user';
-import Rate from './subSchema/rate';
+import IUser from 'models/user';
+import Rate from 'schema/sub-schema/rate';
 
 const UserSchema = new Schema<IUser>(
     {

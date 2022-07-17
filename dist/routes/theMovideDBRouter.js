@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const isAdmin_1 = require("../middelware/isAdmin");
-const theMovieDBController_1 = require("../controllers/theMovieDBController");
+const isAdmin_1 = require("middelwares/isAdmin");
+const theMovieDBController_1 = require("controllers/theMovieDBController");
 const router = (0, express_1.Router)();
 // API - theMovieDB
 // Get a search result

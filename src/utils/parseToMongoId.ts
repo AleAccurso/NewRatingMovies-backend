@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
-import { msg } from '../contants/constants';
+import { msg } from 'constants/constants';
 
-type parsedId = { parsedId?: ObjectId; error?: Error };
+type parsedId = { parsedId?: ObjectId; error?: string };
 
 export const parseToMongoId = (str: string): parsedId => {
     let parsedId: ObjectId | undefined = undefined;
@@ -10,8 +10,8 @@ export const parseToMongoId = (str: string): parsedId => {
     parsedId = new ObjectId(str);
     
     if (typeof parsedId == 'undefined') {
-        error = new Error(msg.BAD_PARAMS + str);
+        return { error: msg.BAD_PARAMS + str } as parsedId;
+    } else {
+        return { parsedId: parsedId } as parsedId
     }
-
-    return { parsedId: parsedId, error: error };
 }

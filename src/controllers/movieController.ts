@@ -1,30 +1,32 @@
 import { RequestHandler } from 'express';
-import dotenv from 'dotenv';
-
-import { msg } from '../contants/constants';
 
 import console from 'console';
 import { exec } from 'child_process';
 
-import IMovie from '../models/movie';
-import IUser from '../models/user';
-import { Movie } from '../schema/movie';
-import { User } from '../schema/user';
-import * as MovieUseCase from '../usecases/movie'
+import { msg } from 'constants/constants';
+import { HttpCode } from 'enums/httpCode';
 
-import UserReqUpdateDTO from '../dto/userReqUpdateDTO';
-import { parseToInt } from '../utils/parseToInt';
-import { RequestTypeEnum } from '../enums/requestType';
-import { ToRequestType } from '../utils/parseToRequestType';
-import MoviePagingDTO from '../dto/moviePagingDTO';
-import { HttpCode } from '../enums/httpCode';
-import HttpException from '../exceptions/httpException';
-import sendError from '../middelware/error';
+import IMovie from 'models/movie';
+import IUser from 'models/user';
 
-dotenv.config();
+import { RequestTypeEnum } from 'enums/requestType';
+
+import UserReqUpdateDTO from 'dto/userReqUpdateDTO';
+import MoviePagingDTO from 'dto/moviePagingDTO';
+
+import { Movie } from 'schema/movie';
+import { User } from 'schema/user';
+
+import * as MovieUseCase from 'usecases/movie'
+import HttpException from 'exceptions/httpException';
+import sendError from 'middelwares/error';
+
+import { ToRequestType } from 'utils/parseToRequestType';
+import { parseToInt } from 'utils/parseToInt';
+import { parseToMongoId } from 'utils/parseToMongoId';
 
 //get movies
-export const getMovies: RequestHandler = async(req, res, next) => {
+export const getMovies: RequestHandler = async(req, res, next): Promise<MoviePagingDTO> => {
     try {
         let pageInt: number = -1;
     
@@ -50,9 +52,9 @@ export const getMovies: RequestHandler = async(req, res, next) => {
             }
         }
     
-        if (pageInt < 0 || sizeInt < 0 ) {
+        if (pageInt < 0 || sizeInt < 1 ) {
             pageInt = 0;
-            sizeInt = 0;
+            sizeInt = 5;
         }
     
         let requestType = RequestTypeEnum.UNKNOWN;
@@ -66,24 +68,22 @@ export const getMovies: RequestHandler = async(req, res, next) => {
                 requestType = parseData;
             }
         }
-    
-        const MoviePagingDTO = MovieUseCase.getMovies(pageInt, sizeInt, requestType)
-    
-        const done = new Promise((resolve, reject) => {
-            if (MoviePagingDTO) {
-                return Promise.resolve(MoviePagingDTO)
-            } else {
-                return Promise.reject()
-            }
-
-        })
+        
+        const movies = await MovieUseCase.getMovies(pageInt, sizeInt, requestType);
+        
+        if (typeof movies != 'undefined') {
+            res.status(HttpCode.OK).json(movies);
+            return Promise.resolve(movies);
+        } else {
+            return Promise.reject([] as IMovie[]);
+        }
     } catch (error) {
         sendError(error as HttpException, req, res, next)
     }
 };
 
 //Add a movie
-export const addMovie: RequestHandler = async (req, res, next) => {
+export const addMovie: RequestHandler = (req, res, next) => {
     let movie = new Movie({
         ...req.body,
     });
@@ -98,25 +98,36 @@ export const addMovie: RequestHandler = async (req, res, next) => {
 };
 
 //Get movie by its id
-export const getMovieById: RequestHandler = async (req, res, next) => {
+export const getMovieById: RequestHandler = (req, res, next) => {
 
-    
-    const movies = Movie.findOne(
-        { _id: req._id },
-        (err: Error, movie: IMovie) => {
-            if (err) {
-                res.status(404).send({
-                    message: msg.RESOURCE_NOT_FOUND + 'movie',
-                });
-            } else if (movie) {
-                res.status(200).json(movie);
-            }
-        },
-    );
+    if (req && req.query && req.query.id) {
+
+        const parseResult = parseToMongoId(req.query.page as string);
+
+        if (!parseResult.parsedId && typeof parseResult.error != 'undefined') {
+            throw new HttpException(HttpCode.BAD_REQUEST, parseResult.error)
+        } else {
+            const movies = Movie.findOne(
+                { _id: parseResult.parsedId },
+                (err: Error, movie: IMovie) => {
+                    if (err) {
+                        res.status(404).send({
+                            message: msg.RESOURCE_NOT_FOUND + 'movie',
+                        });
+                    } else if (movie) {
+                        res.status(200).json(movie);
+                    }
+                },
+            );
+        }
+    } else {
+        throw new HttpException(HttpCode.BAD_REQUEST, msg.MISSING_PARAM+"id")
+    }
 };
 
 //Update a movie
-export const updateMovieById: RequestHandler = async (req, res, next) => {
+export const updateMovieById: RequestHandler = (req, res, next) => {
+    
     const newData = req.body as UserReqUpdateDTO;
     const movie = Movie.findOneAndUpdate(
         { _id: req._id },
@@ -135,7 +146,7 @@ export const updateMovieById: RequestHandler = async (req, res, next) => {
 };
 
 //Delete movie from DB
-export const deleteMovieById: RequestHandler = async (req, res, next) => {
+export const deleteMovieById: RequestHandler = (req, res, next) => {
     const movies = Movie.findOne(
         { _id: req._id },
         (err: Error, movie: IMovie) => {
@@ -182,7 +193,7 @@ export const deleteMovieById: RequestHandler = async (req, res, next) => {
 };
 
 //Change metadata
-export const updateMetaData: RequestHandler = async (req, res, next) => {
+export const updateMetaData: RequestHandler = (req, res, next) => {
     const job = req.body;
 
     //Get file extension
@@ -221,7 +232,7 @@ export const updateMetaData: RequestHandler = async (req, res, next) => {
 };
 
 // Checks if a movie with the concerned movieDBId is in DB
-export const isInDB: RequestHandler = async (req, res, next) => {
+export const isInDB: RequestHandler = (req, res, next) => {
     const movies = Movie.findOne(
         { movieDbId: req._movieDbId },
         (err: Error, movie: IMovie) => {

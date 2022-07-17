@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = require("mongoose");
-const rate_1 = __importDefault(require("./subSchema/rate"));
+const rate_1 = __importDefault(require("schema/sub-schema/rate"));
 const UserSchema = new mongoose_1.Schema({
     nickname: { type: String, required: true },
     email: { type: String, required: true, unique: true },

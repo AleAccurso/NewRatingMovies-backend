@@ -4,31 +4,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CountMovies = exports.GetMoviesMinimum = exports.GetMoviesAdmin = exports.GetMoviesFull = void 0;
-const constants_1 = require("../contants/constants");
-const movie_1 = require("../schema/movie");
+const constants_1 = require("constants/constants");
+const movie_1 = require("schema/movie");
 const mongodb_1 = require("mongodb");
-const httpException_1 = __importDefault(require("../exceptions/httpException"));
-const httpCode_1 = require("../enums/httpCode");
+const httpException_1 = __importDefault(require("exceptions/httpException"));
+const httpCode_1 = require("enums/httpCode");
 const GetMoviesFull = async (page, size) => {
     try {
-        return await movie_1.Movie.find()
+        const movies = movie_1.Movie.find()
             .skip(page * size)
             .limit(size)
-            .exec();
+            .exec((err, movies) => {
+            if (movies) {
+                return Promise.resolve(movies);
+            }
+            else {
+                throw err;
+            }
+        });
+        return Promise.resolve([]);
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
+            Promise.reject([]);
             throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
         }
         else {
+            Promise.reject([]);
             throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
 exports.GetMoviesFull = GetMoviesFull;
-const GetMoviesAdmin = async (page, size) => {
+const GetMoviesAdmin = (page, size) => {
     try {
-        return await movie_1.Movie.find()
+        const movies = movie_1.Movie.find()
             .select({
             release_date: 1,
             vote_average: 1,
@@ -52,21 +62,31 @@ const GetMoviesAdmin = async (page, size) => {
         })
             .skip(page * size)
             .limit(size)
-            .exec();
+            .exec((err, movies) => {
+            if (movies) {
+                return Promise.resolve(movies);
+            }
+            else {
+                throw err;
+            }
+        });
+        return Promise.resolve([]);
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
+            Promise.reject([]);
             throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
         }
         else {
+            Promise.reject([]);
             throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
 exports.GetMoviesAdmin = GetMoviesAdmin;
-const GetMoviesMinimum = async (page, size) => {
+const GetMoviesMinimum = (page, size) => {
     try {
-        return await movie_1.Movie.find()
+        const movies = movie_1.Movie.find()
             .select({
             _id: 1,
             movieDbId: 1,
@@ -90,28 +110,46 @@ const GetMoviesMinimum = async (page, size) => {
         })
             .skip(page * size)
             .limit(size)
-            .exec();
+            .exec((err, movies) => {
+            if (movies) {
+                return Promise.resolve(movies);
+            }
+            else {
+                throw err;
+            }
+        });
+        return Promise.resolve([]);
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
+            Promise.reject([]);
             throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
         }
         else {
+            Promise.reject([]);
             throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
 exports.GetMoviesMinimum = GetMoviesMinimum;
-const CountMovies = async () => {
+const CountMovies = () => {
     try {
-        return await movie_1.Movie.countDocuments({});
+        let count = movie_1.Movie.countDocuments({}).exec((err, count) => {
+            if (count)
+                Promise.resolve(count);
+            else
+                throw err;
+        });
+        return Promise.resolve(-1);
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
+            Promise.reject(-1);
             throw new httpException_1.default(httpCode_1.HttpCode.NO_CONTENT, constants_1.msg.RESOURCE_NOT_FOUND + 'movies');
         }
         else {
-            throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'count_movies');
+            Promise.reject(-1);
+            throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };

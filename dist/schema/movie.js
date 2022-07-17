@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Movie = void 0;
 const mongoose_1 = require("mongoose");
-const localMovieInfo_1 = __importDefault(require("./subSchema/localMovieInfo"));
+const localMovieInfo_1 = __importDefault(require("schema/sub-schema/localMovieInfo"));
 const MovieSchema = new mongoose_1.Schema({
     movieDbId: { type: Number, required: true, unique: true },
     release_date: { type: String, required: true },

@@ -1,6 +1,9 @@
 import { Application } from 'express';
 import { ConnectOptions, connect, connection, set } from 'mongoose';
-import { run } from '../server/server';
+import { run } from 'server/server';
+import { config } from 'dotenv';
+
+config();
 
 export const start = async (app: Application) => {
     set('debug', true);

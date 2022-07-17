@@ -2,15 +2,15 @@ import express from 'express';
 import { json, urlencoded } from 'body-parser';
 
 // Manage HTTP requests
-import { httpHeaders } from './config/httpHeaders';
+import { httpHeaders } from 'config/httpHeaders';
+import errorMiddleware from 'middelwares/error';
 
 // routes
-import userRouter from './routes/userRouter';
-import authRouter from './routes/authRouter';
-import movieRouter from './routes/movieRouter';
-import theMovideDBRouter from './routes/theMovideDBRouter';
-import { start } from './database/database';
-import errorMiddleware from './middelware/error';
+import userRouter from 'routes/userRouter';
+import authRouter from 'routes/authRouter';
+import movieRouter from 'routes/movieRouter';
+import theMovideDBRouter from 'routes/theMovideDBRouter';
+import { start } from 'database/database';
 
 // Create server
 const server = express();

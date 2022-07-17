@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { authMsg, msg } from '../contants/constants';
-import { User } from '../schema/user';
+import { authMsg, msg } from 'constants/constants';
+import { User } from 'schema/user';
 
 export const isAdmin: RequestHandler = async (req, res, next) => {
     let decoded: string | jwt.JwtPayload;

@@ -1,6 +1,6 @@
 // import { Request } from 'express';
 // import { ObjectId } from 'mongoose';
-// import { language } from '../types/language';
+// import { language } from '@types/language';
 
 // export interface CustomRequest extends Request {
 //     _page: number;

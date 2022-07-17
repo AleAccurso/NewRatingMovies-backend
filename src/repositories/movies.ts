@@ -1,34 +1,43 @@
-import { msg } from '../contants/constants';
-import IMovie from '../models/movie';
-import { Movie } from '../schema/movie';
+import { msg } from 'constants/constants';
+import IMovie from 'models/movie';
+import { Movie } from 'schema/movie';
 import { MongoError } from 'mongodb';
-import HttpException from '../exceptions/httpException';
-import { HttpCode } from '../enums/httpCode';
+import HttpException from 'exceptions/httpException';
+import { HttpCode } from 'enums/httpCode';
 
-export const GetMoviesFull = async (
+export const GetMoviesFull = async(
     page: number,
     size: number,
 ): Promise<IMovie[]> => {
     try {
-        return await Movie.find()
+        const movies = Movie.find()
             .skip(page * size)
             .limit(size)
-            .exec();
+            .exec((err, movies) => {
+                if (movies) {
+                    return Promise.resolve(movies);
+                } else {
+                    throw err;
+                }
+            });
+        return Promise.resolve([] as IMovie[]);
     } catch (err) {
         if (err instanceof MongoError) {
+            Promise.reject([] as IMovie[])
             throw new HttpException(HttpCode.NO_CONTENT,msg.RESOURCE_NOT_FOUND + 'movies');
         } else {
+            Promise.reject([] as IMovie[])
             throw new HttpException(HttpCode.INTERNAL_SERVER_ERROR, msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
 
-export const GetMoviesAdmin = async (
+export const GetMoviesAdmin = (
     page: number,
     size: number,
 ): Promise<IMovie[]> => {
     try {
-        return await Movie.find()
+        const movies = Movie.find()
             .select({
                 release_date: 1,
                 vote_average: 1,
@@ -52,22 +61,31 @@ export const GetMoviesAdmin = async (
             })
             .skip(page * size)
             .limit(size)
-            .exec();
+            .exec((err, movies) => {
+                if (movies) {
+                    return Promise.resolve(movies);
+                } else {
+                    throw err;
+                }
+            });
+        return Promise.resolve([] as IMovie[]);
     } catch (err) {
         if (err instanceof MongoError) {
+            Promise.reject([] as IMovie[])
             throw new HttpException(HttpCode.NO_CONTENT,msg.RESOURCE_NOT_FOUND + 'movies');
         } else {
+            Promise.reject([] as IMovie[])
             throw new HttpException(HttpCode.INTERNAL_SERVER_ERROR, msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
 
-export const GetMoviesMinimum = async (
+export const GetMoviesMinimum = (
     page: number,
     size: number,
 ): Promise<IMovie[]> => {
     try {
-        return await Movie.find()
+        const movies = Movie.find()
             .select({
                 _id: 1,
                 movieDbId: 1,
@@ -91,24 +109,39 @@ export const GetMoviesMinimum = async (
             })
             .skip(page * size)
             .limit(size)
-            .exec();
+            .exec((err, movies) => {
+                if (movies) {
+                    return Promise.resolve(movies);
+                } else {
+                    throw err;
+                }
+            });
+        return Promise.resolve([] as IMovie[]);
     } catch (err) {
         if (err instanceof MongoError) {
+            Promise.reject([] as IMovie[])
             throw new HttpException(HttpCode.NO_CONTENT,msg.RESOURCE_NOT_FOUND + 'movies');
         } else {
+            Promise.reject([] as IMovie[])
             throw new HttpException(HttpCode.INTERNAL_SERVER_ERROR, msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
 
-export const CountMovies = async (): Promise<number> => {
+export const CountMovies = (): Promise<number> => {
     try {
-        return await Movie.countDocuments({});
+        let count = Movie.countDocuments({}).exec((err, count) => {
+            if (count) Promise.resolve(count);
+            else throw err
+        })
+        return Promise.resolve(-1);
     } catch (err) {
         if (err instanceof MongoError) {
+            Promise.reject(-1)
             throw new HttpException(HttpCode.NO_CONTENT,msg.RESOURCE_NOT_FOUND + 'movies');
         } else {
-            throw new HttpException(HttpCode.INTERNAL_SERVER_ERROR, msg.UNABLE_TO_DO_ACTION + 'count_movies');
+            Promise.reject(-1)
+            throw new HttpException(HttpCode.INTERNAL_SERVER_ERROR, msg.UNABLE_TO_DO_ACTION + 'get_movies');
         }
     }
 };
