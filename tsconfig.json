@@ -1,5 +1,6 @@
 {
   "exclude": [
+    "dist",
     "node_modules"
   ],
   "compilerOptions": {
@@ -31,26 +32,25 @@
     "module": "commonjs",                                /* Specify what module code is generated. */
     "rootDir": "./src",                                  /* Specify the root folder within your source files. */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
-    "baseUrl": "./src/",                                    /* Specify the base directory to resolve non-relative module names. */
+    "baseUrl": "./src",                                    /* Specify the base directory to resolve non-relative module names. */
     "paths": {                                           /* Specify a set of entries that re-map imports to additional lookup locations. */
-			"config/*": ["config/*"],
-			"constants/*": ["constants/*"],
-			"controllers/*": ["controllers/*"],
-			"database/*": ["database/*"],
-			"dto/*": ["dto/*"],
-			"enums/*": ["enums/*"],
-			"exceptions/*": ["exceptions/*"],
-			"interfaces/*": ["interfaces/*"],
-			"middelwares/*": ["middelwares/*"],
-			"models/*": ["models/*"],
-			"repositories/*": ["repositories/*"],
-			"routes/*": ["routes/*"],
-			"schema/": ["schema/"],
-      "subschema/*": ["schema/subschema/*"],
-			"server/*": ["server/*"],
-			"types/*": ["types/*"],
-			"usecases/*": ["usecases/*"],
-			"utils/*": ["utils/*"]
+			"@config/*": ["config/*"],
+			"@constants/*": ["constants/*"],
+			"@controllers/*": ["controllers/*"],
+			"@database/*": ["database/*"],
+			"@dtos/*": ["dtos/*"],
+			"@enums/*": ["enums/*"],
+			"@exceptions/*": ["exceptions/*"],
+			"@interfaces/*": ["interfaces/*"],
+			"@middelwares/*": ["middelwares/*"],
+			"@models/*": ["models/*"],
+			"@repositories/*": ["repositories/*"],
+			"@routes/*": ["routes/*"],
+			"@schema/*": ["schema/*"],
+			"@server/*": ["server/*"],
+			"@mytypes/*": ["types/*"],
+			"@usecases/*": ["usecases/*"],
+			"@utils/*": ["utils/*"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     "typeRoots": ["./node_modules/types", "./src/types"], /* Specify multiple folders that act like './node_modules/types'. */
@@ -121,5 +121,8 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
-  }
+  },
+  "include": [
+    "**/*.ts"
+  ]
 }

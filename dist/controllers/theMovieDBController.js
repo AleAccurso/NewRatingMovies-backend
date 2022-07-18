@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInfoFromAPI = exports.getSearchResultsFromAPI = void 0;
 const axios_1 = __importDefault(require("axios"));
-const constants_1 = require("constants/constants");
-const languages_1 = require("enums/languages");
+const constants_1 = require("@constants/constants");
+const languages_1 = require("@enums/languages");
 //Get search result from api
 const getSearchResultsFromAPI = (req, res, next) => {
     let url = process.env.API_URL +

@@ -24,8 +24,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const isAdmin_1 = require("middelwares/isAdmin");
-const movieController = __importStar(require("controllers/movieController"));
+const isAdmin_1 = require("@middelwares/isAdmin");
+const movieController = __importStar(require("@controllers/movieController"));
 const router = (0, express_1.Router)();
 router
     .route("/")

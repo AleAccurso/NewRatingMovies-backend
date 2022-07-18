@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { isAdmin } from "middelwares/isAdmin";
-import { getSearchResultsFromAPI, getInfoFromAPI } from "controllers/theMovieDBController";
+
+import { isAdmin } from "@middelwares/isAdmin";
+import { getSearchResultsFromAPI, getInfoFromAPI } from "@controllers/theMovieDBController";
 
 const router = Router();
 

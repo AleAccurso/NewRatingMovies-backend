@@ -29,19 +29,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isInDB = exports.updateMetaData = exports.deleteMovieById = exports.updateMovieById = exports.getMovieById = exports.addMovie = exports.getMovies = void 0;
 const console_1 = __importDefault(require("console"));
 const child_process_1 = require("child_process");
-const constants_1 = require("constants/constants");
-const httpCode_1 = require("enums/httpCode");
-const requestType_1 = require("enums/requestType");
-const movie_1 = require("schema/movie");
-const user_1 = require("schema/user");
-const MovieUseCase = __importStar(require("usecases/movie"));
-const httpException_1 = __importDefault(require("exceptions/httpException"));
-const error_1 = __importDefault(require("middelwares/error"));
-const parseToRequestType_1 = require("utils/parseToRequestType");
-const parseToInt_1 = require("utils/parseToInt");
-const parseToMongoId_1 = require("utils/parseToMongoId");
+const constants_1 = require("@constants/constants");
+const httpCode_1 = require("@enums/httpCode");
+const requestType_1 = require("@enums/requestType");
+const movie_1 = require("@schema/movie");
+const user_1 = require("@schema/user");
+const MovieUseCase = __importStar(require("@usecases/movie"));
+const httpException_1 = __importDefault(require("@exceptions/httpException"));
+const error_1 = __importDefault(require("@middelwares/error"));
+const parseToRequestType_1 = require("@utils/parseToRequestType");
+const parseToInt_1 = require("@utils/parseToInt");
+const parseToMongoId_1 = require("@utils/parseToMongoId");
 //get movies
-const getMovies = async (req, res, next) => {
+const getMovies = (req, res, next) => {
     try {
         let pageInt = -1;
         if (req && req.query && req.query.page) {
@@ -77,13 +77,16 @@ const getMovies = async (req, res, next) => {
                 requestType = parseData;
             }
         }
-        const movies = await MovieUseCase.getMovies(pageInt, sizeInt, requestType);
+        const movies = MovieUseCase.getMovies(pageInt, sizeInt, requestType);
         if (typeof movies != 'undefined') {
             res.status(httpCode_1.HttpCode.OK).json(movies);
-            return Promise.resolve(movies);
         }
         else {
-            return Promise.reject([]);
+            res.status(httpCode_1.HttpCode.OK).json({
+                page: pageInt,
+                size: sizeInt,
+                requestType: requestType
+            });
         }
     }
     catch (error) {

@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isAdmin = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const constants_1 = require("constants/constants");
-const user_1 = require("schema/user");
+const constants_1 = require("@constants/constants");
+const user_1 = require("@schema/user");
 const isAdmin = async (req, res, next) => {
     let decoded;
     try {

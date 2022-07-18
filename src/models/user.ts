@@ -1,4 +1,4 @@
-import { language } from "types/language";
+import { language } from "@mytypes/language";
 import { Document, Model, ObjectId } from "mongoose";
 
 export default interface IUser extends Document {

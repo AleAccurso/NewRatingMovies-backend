@@ -1,5 +1,5 @@
-import IMovie from "models/movie";
-import { requestType } from 'types/requestType';
+import IMovie from "@models/movie";
+import { requestType } from '@mytypes/requestType';
 
 export default interface MoviePagingDTO {
     page: number,

@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
-import IMovie from "models/movie";
-import localMovieInfo from "schema/sub-schema/localMovieInfo"
+
+import IMovie from "@models/movie";
+import localMovieInfo from "@schema/sub-schema/localMovieInfo"
 
 const MovieSchema = new Schema(
     {

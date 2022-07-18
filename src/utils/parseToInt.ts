@@ -1,4 +1,4 @@
-import { msg } from 'constants/constants';
+import { msg } from '@constants/constants';
 
 type parsedInt = { parsedInt?: number; error?: string };
 

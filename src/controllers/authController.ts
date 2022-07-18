@@ -3,12 +3,12 @@ import { hash, compare } from 'bcryptjs';
 
 import { MongoError } from 'mongodb';
 
-import { User } from 'schema/user';
+import { User } from '@schema/user';
 import { sign } from 'jsonwebtoken';
 
-import { authMsg, msg } from 'constants/constants';
-import IUser from 'models/user';
-import UserReqCreateDTO from 'dto/userReqCreateDTO';
+import { authMsg, msg } from '@constants/constants';
+import IUser from '@models/user';
+import UserReqCreateDTO from '@dtos/userReqCreateDTO';
 
 export const register: RequestHandler = async (req, res, next) => {
     const { nickname, email, password, language } = req.body as UserReqCreateDTO;

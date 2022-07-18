@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { msg } from 'constants/constants';
+
+import { msg } from '@constants/constants';
 
 type parsedId = { parsedId?: ObjectId; error?: string };
 

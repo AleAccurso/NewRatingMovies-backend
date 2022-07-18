@@ -1,14 +1,15 @@
-import { msg } from 'constants/constants';
-import IMovie from 'models/movie';
-import { Movie } from 'schema/movie';
 import { MongoError } from 'mongodb';
-import HttpException from 'exceptions/httpException';
-import { HttpCode } from 'enums/httpCode';
 
-export const GetMoviesFull = async(
+import { msg } from '@constants/constants';
+import IMovie from '@models/movie';
+import { Movie } from '@schema/movie';
+import HttpException from '@exceptions/httpException';
+import { HttpCode } from '@enums/httpCode';
+
+export const GetMoviesFull = (
     page: number,
     size: number,
-): Promise<IMovie[]> => {
+): IMovie[] => {
     try {
         const movies = Movie.find()
             .skip(page * size)
@@ -20,7 +21,7 @@ export const GetMoviesFull = async(
                     throw err;
                 }
             });
-        return Promise.resolve([] as IMovie[]);
+        return [] as IMovie[];
     } catch (err) {
         if (err instanceof MongoError) {
             Promise.reject([] as IMovie[])
@@ -35,7 +36,7 @@ export const GetMoviesFull = async(
 export const GetMoviesAdmin = (
     page: number,
     size: number,
-): Promise<IMovie[]> => {
+): IMovie[] => {
     try {
         const movies = Movie.find()
             .select({
@@ -63,12 +64,12 @@ export const GetMoviesAdmin = (
             .limit(size)
             .exec((err, movies) => {
                 if (movies) {
-                    return Promise.resolve(movies);
+                    return movies;
                 } else {
                     throw err;
                 }
             });
-        return Promise.resolve([] as IMovie[]);
+        return [] as IMovie[];
     } catch (err) {
         if (err instanceof MongoError) {
             Promise.reject([] as IMovie[])
@@ -83,7 +84,7 @@ export const GetMoviesAdmin = (
 export const GetMoviesMinimum = (
     page: number,
     size: number,
-): Promise<IMovie[]> => {
+): IMovie[] => {
     try {
         const movies = Movie.find()
             .select({
@@ -111,12 +112,12 @@ export const GetMoviesMinimum = (
             .limit(size)
             .exec((err, movies) => {
                 if (movies) {
-                    return Promise.resolve(movies);
+                    return movies;
                 } else {
                     throw err;
                 }
             });
-        return Promise.resolve([] as IMovie[]);
+        return [] as IMovie[];
     } catch (err) {
         if (err instanceof MongoError) {
             Promise.reject([] as IMovie[])
@@ -128,13 +129,13 @@ export const GetMoviesMinimum = (
     }
 };
 
-export const CountMovies = (): Promise<number> => {
+export const CountMovies = (): number => {
     try {
         let count = Movie.countDocuments({}).exec((err, count) => {
-            if (count) Promise.resolve(count);
+            if (count) return count;
             else throw err
         })
-        return Promise.resolve(-1);
+        return -1;
     } catch (err) {
         if (err instanceof MongoError) {
             Promise.reject(-1)

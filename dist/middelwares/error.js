@@ -6,8 +6,8 @@ function sendError(error, request, response, next) {
     response
         .status(status)
         .send({
-        status,
-        message,
+        status: status,
+        message: message,
     });
 }
 exports.default = sendError;

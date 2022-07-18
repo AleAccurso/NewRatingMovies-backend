@@ -1,4 +1,4 @@
-import { language } from "types/language";
+import { language } from "@mytypes/language";
 
 export default interface UserReqUpdateDTO {
     nickname: string,

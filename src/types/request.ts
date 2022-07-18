@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
-import { language } from 'types/language';
+
+import { language } from '@mytypes/language';
 
 declare module 'express-serve-static-core' {
     export interface Request {

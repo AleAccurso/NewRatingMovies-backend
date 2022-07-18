@@ -4,12 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CountMovies = exports.GetMoviesMinimum = exports.GetMoviesAdmin = exports.GetMoviesFull = void 0;
-const constants_1 = require("constants/constants");
-const movie_1 = require("schema/movie");
 const mongodb_1 = require("mongodb");
-const httpException_1 = __importDefault(require("exceptions/httpException"));
-const httpCode_1 = require("enums/httpCode");
-const GetMoviesFull = async (page, size) => {
+const constants_1 = require("@constants/constants");
+const movie_1 = require("@schema/movie");
+const httpException_1 = __importDefault(require("@exceptions/httpException"));
+const httpCode_1 = require("@enums/httpCode");
+const GetMoviesFull = (page, size) => {
     try {
         const movies = movie_1.Movie.find()
             .skip(page * size)
@@ -22,7 +22,7 @@ const GetMoviesFull = async (page, size) => {
                 throw err;
             }
         });
-        return Promise.resolve([]);
+        return [];
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
@@ -64,13 +64,13 @@ const GetMoviesAdmin = (page, size) => {
             .limit(size)
             .exec((err, movies) => {
             if (movies) {
-                return Promise.resolve(movies);
+                return movies;
             }
             else {
                 throw err;
             }
         });
-        return Promise.resolve([]);
+        return [];
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
@@ -112,13 +112,13 @@ const GetMoviesMinimum = (page, size) => {
             .limit(size)
             .exec((err, movies) => {
             if (movies) {
-                return Promise.resolve(movies);
+                return movies;
             }
             else {
                 throw err;
             }
         });
-        return Promise.resolve([]);
+        return [];
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {
@@ -136,11 +136,11 @@ const CountMovies = () => {
     try {
         let count = movie_1.Movie.countDocuments({}).exec((err, count) => {
             if (count)
-                Promise.resolve(count);
+                return count;
             else
                 throw err;
         });
-        return Promise.resolve(-1);
+        return -1;
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {

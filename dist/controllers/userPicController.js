@@ -4,9 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadPic = exports.removeOldPic = void 0;
-const user_1 = require("schema/user");
 const path_1 = __importDefault(require("path"));
 const storage_1 = require("@google-cloud/storage");
+const user_1 = require("@schema/user");
 const gc = new storage_1.Storage({
     keyFilename: path_1.default.join(__dirname, '@google-credentials.json'),
     projectId: 'my-project-1623954720104',

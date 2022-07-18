@@ -3,30 +3,30 @@ import { RequestHandler } from 'express';
 import console from 'console';
 import { exec } from 'child_process';
 
-import { msg } from 'constants/constants';
-import { HttpCode } from 'enums/httpCode';
+import { msg } from '@constants/constants';
+import { HttpCode } from '@enums/httpCode';
 
-import IMovie from 'models/movie';
-import IUser from 'models/user';
+import IMovie from '@models/movie';
+import IUser from '@models/user';
 
-import { RequestTypeEnum } from 'enums/requestType';
+import { RequestTypeEnum } from '@enums/requestType';
 
-import UserReqUpdateDTO from 'dto/userReqUpdateDTO';
-import MoviePagingDTO from 'dto/moviePagingDTO';
+import UserReqUpdateDTO from '@dtos/userReqUpdateDTO';
+import MoviePagingDTO from '@dtos/moviePagingDTO';
 
-import { Movie } from 'schema/movie';
-import { User } from 'schema/user';
+import { Movie } from '@schema/movie';
+import { User } from '@schema/user';
 
-import * as MovieUseCase from 'usecases/movie'
-import HttpException from 'exceptions/httpException';
-import sendError from 'middelwares/error';
+import * as MovieUseCase from '@usecases/movie'
+import HttpException from '@exceptions/httpException';
+import sendError from '@middelwares/error';
 
-import { ToRequestType } from 'utils/parseToRequestType';
-import { parseToInt } from 'utils/parseToInt';
-import { parseToMongoId } from 'utils/parseToMongoId';
+import { ToRequestType } from '@utils/parseToRequestType';
+import { parseToInt } from '@utils/parseToInt';
+import { parseToMongoId } from '@utils/parseToMongoId';
 
 //get movies
-export const getMovies: RequestHandler = async(req, res, next): Promise<MoviePagingDTO> => {
+export const getMovies: RequestHandler = (req, res, next): MoviePagingDTO => {
     try {
         let pageInt: number = -1;
     
@@ -69,13 +69,16 @@ export const getMovies: RequestHandler = async(req, res, next): Promise<MoviePag
             }
         }
         
-        const movies = await MovieUseCase.getMovies(pageInt, sizeInt, requestType);
+        const movies = MovieUseCase.getMovies(pageInt, sizeInt, requestType);
         
         if (typeof movies != 'undefined') {
             res.status(HttpCode.OK).json(movies);
-            return Promise.resolve(movies);
         } else {
-            return Promise.reject([] as IMovie[]);
+            res.status(HttpCode.OK).json({
+                page: pageInt,
+                size: sizeInt,
+                requestType: requestType
+            } as MoviePagingDTO);
         }
     } catch (error) {
         sendError(error as HttpException, req, res, next)

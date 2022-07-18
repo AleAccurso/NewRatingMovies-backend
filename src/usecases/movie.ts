@@ -1,14 +1,14 @@
-import MoviePagingDTO from 'dto/moviePagingDTO';
-import { RequestTypeEnum } from 'enums/requestType';
-import HttpException from 'exceptions/httpException';
 
-import * as MovieRepository from 'repositories/movies';
+import { RequestTypeEnum } from '@enums/requestType';
+import HttpException from '@exceptions/httpException';
+import * as MovieRepository from '@repositories/movies';
+import MoviePagingDTO from '@dtos/moviePagingDTO';
 
-export const getMovies = async (
+export const getMovies = (
     page: number,
     size: number,
     data: RequestTypeEnum,
-): Promise<MoviePagingDTO> => {
+): MoviePagingDTO => {
     try {
         let moviePagingDTO = {
             page: page,
@@ -16,14 +16,14 @@ export const getMovies = async (
             requestType: data,
         } as MoviePagingDTO;
 
-        const count = await MovieRepository.CountMovies();
+        const count = MovieRepository.CountMovies();
 
         moviePagingDTO.nbResults = count;
         moviePagingDTO.nbPages = Math.ceil(count / size);
 
         switch (data) {
             case RequestTypeEnum.FULL:
-                const moviesFull = await MovieRepository.GetMoviesFull(
+                const moviesFull = MovieRepository.GetMoviesFull(
                     page,
                     size,
                 );
@@ -32,7 +32,7 @@ export const getMovies = async (
                 }
                 break;
             case RequestTypeEnum.ADMIN:
-                const moviesAdmin = await MovieRepository.GetMoviesAdmin(
+                const moviesAdmin = MovieRepository.GetMoviesAdmin(
                     page,
                     size,
                 );
@@ -41,7 +41,7 @@ export const getMovies = async (
                 }
                 break;
             case RequestTypeEnum.MINIMUM:
-                const moviesMinimum = await MovieRepository.GetMoviesMinimum(
+                const moviesMinimum = MovieRepository.GetMoviesMinimum(
                     page,
                     size,
                 );
