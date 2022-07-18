@@ -24,6 +24,7 @@ import sendError from '@middelwares/error';
 import { ToRequestType } from '@utils/parseToRequestType';
 import { parseToInt } from '@utils/parseToInt';
 import { parseToMongoId } from '@utils/parseToMongoId';
+import { ObjectId } from 'mongodb';
 
 //get movies
 export const getMovies: RequestHandler = (req, res, next): MoviePagingDTO => {
@@ -130,10 +131,22 @@ export const getMovieById: RequestHandler = (req, res, next) => {
 
 //Update a movie
 export const updateMovieById: RequestHandler = (req, res, next) => {
+
+    let movieId = {} as ObjectId
+    
+    if (req && req.query && req.query.id) {
+        const parseResult = parseToMongoId(req.query.id as string);
+
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        } else {
+            movieId = parseResult.parsedId;
+        }
+    }
     
     const newData = req.body as UserReqUpdateDTO;
     const movie = Movie.findOneAndUpdate(
-        { _id: req._id },
+        { _id: movieId },
         {
             ...newData,
         },
@@ -150,8 +163,20 @@ export const updateMovieById: RequestHandler = (req, res, next) => {
 
 //Delete movie from DB
 export const deleteMovieById: RequestHandler = (req, res, next) => {
+    let movieId = {} as ObjectId
+    
+    if (req && req.query && req.query.id) {
+        const parseResult = parseToMongoId(req.query.id as string);
+
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        } else {
+            movieId = parseResult.parsedId;
+        }
+    }
+
     const movies = Movie.findOne(
-        { _id: req._id },
+        { _id: movieId },
         (err: Error, movie: IMovie) => {
             if (err) {
                 res.status(404).send({
@@ -180,7 +205,7 @@ export const deleteMovieById: RequestHandler = (req, res, next) => {
                     });
 
                 // Remove movie from DB
-                Movie.deleteOne({ id: req._id }, (err) => {
+                Movie.deleteOne({ id: movieId }, (err) => {
                     if (err) {
                         res.status(500).send({ message: msg.SERVER_ERROR });
                     } else {
@@ -236,8 +261,20 @@ export const updateMetaData: RequestHandler = (req, res, next) => {
 
 // Checks if a movie with the concerned movieDBId is in DB
 export const isInDB: RequestHandler = (req, res, next) => {
+    let movieDBInt: number = -1;
+    
+    if (req && req.query && req.query.page) {
+        const parseResult = parseToInt(req.query.page as string);
+
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        } else {
+            movieDBInt = parseResult.parsedInt;
+        }
+    }
+
     const movies = Movie.findOne(
-        { movieDbId: req._movieDbId },
+        { movieDbId: movieDBInt },
         (err: Error, movie: IMovie) => {
             if (err) {
                 res.status(404).send({

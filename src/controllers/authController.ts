@@ -74,7 +74,7 @@ export const login: RequestHandler = async (req, res, next) => {
         }
 
         const token = sign(
-            { email: loadedUser.email },
+            { id: loadedUser._id, email: loadedUser.email },
             process.env.JWT_SECRET,
             {
                 expiresIn: '24h',

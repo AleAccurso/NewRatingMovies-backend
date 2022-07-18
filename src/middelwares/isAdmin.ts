@@ -23,6 +23,7 @@ export const isAdmin: RequestHandler = async (req, res, next) => {
             let user = await User.findOne({ email: decoded.email as string });
 
             if (!user) {
+                req._userAdmin = false;
                 return res.status(401).json({
                     message: msg.RESOURCE_NOT_FOUND + 'user',
                 });
@@ -31,6 +32,10 @@ export const isAdmin: RequestHandler = async (req, res, next) => {
             if (!user.isAdmin) {
                 throw new Error();
             }
+            req._userId = user._id
+            req._userAdmin = true;
+        } else {
+            req._userAdmin = false;
         }
         next();
     } catch (err) {

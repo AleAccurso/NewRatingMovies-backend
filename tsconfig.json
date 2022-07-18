@@ -123,6 +123,10 @@
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
   },
   "include": [
-    "**/*.ts"
+    "src/**/*"
+  ],
+  "files": [
+    "src/interfaces/global.d.ts",
+    "src/interfaces/request.d.ts"
   ]
 }
