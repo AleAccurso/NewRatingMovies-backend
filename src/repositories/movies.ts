@@ -109,7 +109,7 @@ export const GetMoviesMinimum = async(
 export const CountMovies = async(): Promise<number> => {
     try {
         let count = await Movie.countDocuments({}).exec();
-        return count;
+        return Promise.resolve(count);
     } catch (err) {
         if (err instanceof MongoError) {
             throw new HttpException(HttpCode.NO_CONTENT,msg.RESOURCE_NOT_FOUND + 'movies');

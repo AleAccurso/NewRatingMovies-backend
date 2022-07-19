@@ -4,7 +4,6 @@ exports.parseToInt = void 0;
 const constants_1 = require("@constants/constants");
 const parseToInt = (str) => {
     const parsedInt = Number(str);
-    let error = undefined;
     if (!isNaN(parsedInt) && typeof parsedInt != 'undefined') {
         return { parsedInt: parsedInt };
     }

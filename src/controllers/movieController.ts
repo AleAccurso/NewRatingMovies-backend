@@ -34,7 +34,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
             const parseResult = parseToInt(req.query.page as string);
     
             if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-                res.status(400).json({ message: parseResult.error });
+                throw new HttpException(HttpCode.BAD_REQUEST, parseResult.error as string)
             } else {
                 pageInt = parseResult.parsedInt;
             }
@@ -46,7 +46,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
             const parseResult = parseToInt(req.query.size as string);
     
             if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-                res.status(400).json({ message: parseResult.error });
+                throw new HttpException(HttpCode.BAD_REQUEST, parseResult.error as string)
             } else {
                 sizeInt = parseResult.parsedInt;
             }
@@ -63,7 +63,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
             const parseData = ToRequestType(req.query.data as string)
     
             if (parseData === RequestTypeEnum.UNKNOWN) {
-                res.status(400).json({ message: msg.BAD_PARAMS + req.query.data });
+                throw new HttpException(HttpCode.BAD_REQUEST, msg.BAD_PARAMS + req.query.data);
             } else {
                 requestType = parseData;
             }
@@ -80,6 +80,7 @@ export const getMovies: RequestHandler = async (req, res, next) => {
 
 //Add a movie
 export const addMovie: RequestHandler = (req, res, next) => {
+
     let movie = new Movie({
         ...req.body,
     });

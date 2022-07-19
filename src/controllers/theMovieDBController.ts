@@ -7,9 +7,26 @@ import { MovieInfoAPI } from '@interfaces/movieInfo';
 import { localMovieInfo } from '@models/movie';
 import { LanguagesEnum } from '@enums/languages';
 import { parseToInt } from '@utils/parseToInt';
+import SearchResDTO from '../dtos/searchResDTO';
+import { ToLanguage } from '@utils/parseToLanguage';
+import { HttpCode } from '@enums/httpCode';
+import HttpException from '@exceptions/httpException';
 
 //Get search result from api
 export const getSearchResultsFromAPI: RequestHandler = (req, res, next) => {
+
+    let lang = LanguagesEnum.UNKNOWN
+    
+    if (req && req.params && req.params.language) {
+        const parseResult = ToLanguage(req.params.language as string);
+
+        if (parseResult === LanguagesEnum.UNKNOWN) {
+            throw new HttpException(HttpCode.BAD_REQUEST, msg.BAD_PARAMS + req.params.language)
+        } else {
+            lang = parseResult;
+        }
+    }
+
     let url =
         process.env.API_URL +
         '/search/movie?api_key=' +
@@ -17,32 +34,30 @@ export const getSearchResultsFromAPI: RequestHandler = (req, res, next) => {
         '&query=' +
         req.params.title.replace(' ', '+') +
         '&language=' +
-        req.params.language;
+        lang;
 
     axios
         .get(url)
         .then((response) => {
             let data = response.data['results'];
-            let toReturn = [];
+            let toReturn = [] as SearchResDTO[];
 
             for (let index = 0; index < data.length; index++) {
                 toReturn.push({
                     id: data[index].id,
                     release_date: data[index].release_date,
-                    [req.params.language]: {
+                    [lang]: {
                         poster_path: data[index].poster_path,
                         title: data[index].title,
                         overview: data[index].overview,
                     },
-                });
+                } as SearchResDTO);
             }
             res.status(200).json(toReturn);
         })
         .catch((err) => {
             if (!err.statusCode) {
-                return res.status(500).json({
-                    message: msg.SERVER_ERROR,
-                });
+                throw new HttpException(HttpCode.INTERNAL_SERVER_ERROR, msg.SERVER_ERROR)
             } else {
                 console.log(
                     'movieDBController/getSearchResultsFromAPI?statusCode=' +
@@ -59,8 +74,8 @@ export const getSearchResultsFromAPI: RequestHandler = (req, res, next) => {
 export const getInfoFromAPI: RequestHandler = async (req, res, next) => {
     let movieDbIdInt: number = -1;
     
-    if (req && req.query && req.query.page) {
-        const parseResult = parseToInt(req.query.page as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToInt(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
             res.status(400).json({ message: parseResult.error });

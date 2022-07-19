@@ -1,8 +1,10 @@
 import { HttpCode } from '@enums/httpCode';
 
 class HttpException extends Error {
+    
     status: HttpCode;
     message: string;
+
     constructor(status: HttpCode, message: string) {
         super(message);
         this.status = status as number;

@@ -8,15 +8,28 @@ const axios_1 = __importDefault(require("axios"));
 const constants_1 = require("@constants/constants");
 const languages_1 = require("@enums/languages");
 const parseToInt_1 = require("@utils/parseToInt");
+const parseToLanguage_1 = require("@utils/parseToLanguage");
+const httpCode_1 = require("@enums/httpCode");
+const httpException_1 = __importDefault(require("@exceptions/httpException"));
 //Get search result from api
 const getSearchResultsFromAPI = (req, res, next) => {
+    let lang = languages_1.LanguagesEnum.UNKNOWN;
+    if (req && req.params && req.params.language) {
+        const parseResult = (0, parseToLanguage_1.ToLanguage)(req.params.language);
+        if (parseResult === languages_1.LanguagesEnum.UNKNOWN) {
+            throw new httpException_1.default(httpCode_1.HttpCode.BAD_REQUEST, constants_1.msg.BAD_PARAMS + req.params.language);
+        }
+        else {
+            lang = parseResult;
+        }
+    }
     let url = process.env.API_URL +
         '/search/movie?api_key=' +
         process.env.API_TOKEN +
         '&query=' +
         req.params.title.replace(' ', '+') +
         '&language=' +
-        req.params.language;
+        lang;
     axios_1.default
         .get(url)
         .then((response) => {
@@ -26,7 +39,7 @@ const getSearchResultsFromAPI = (req, res, next) => {
             toReturn.push({
                 id: data[index].id,
                 release_date: data[index].release_date,
-                [req.params.language]: {
+                [lang]: {
                     poster_path: data[index].poster_path,
                     title: data[index].title,
                     overview: data[index].overview,
@@ -37,9 +50,7 @@ const getSearchResultsFromAPI = (req, res, next) => {
     })
         .catch((err) => {
         if (!err.statusCode) {
-            return res.status(500).json({
-                message: constants_1.msg.SERVER_ERROR,
-            });
+            throw new httpException_1.default(httpCode_1.HttpCode.INTERNAL_SERVER_ERROR, constants_1.msg.SERVER_ERROR);
         }
         else {
             console.log('movieDBController/getSearchResultsFromAPI?statusCode=' +
@@ -54,8 +65,8 @@ exports.getSearchResultsFromAPI = getSearchResultsFromAPI;
 // movieDbId in our DB
 const getInfoFromAPI = async (req, res, next) => {
     let movieDbIdInt = -1;
-    if (req && req.query && req.query.page) {
-        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }

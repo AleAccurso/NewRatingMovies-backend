@@ -108,7 +108,7 @@ exports.GetMoviesMinimum = GetMoviesMinimum;
 const CountMovies = async () => {
     try {
         let count = await movie_1.Movie.countDocuments({}).exec();
-        return count;
+        return Promise.resolve(count);
     }
     catch (err) {
         if (err instanceof mongodb_1.MongoError) {

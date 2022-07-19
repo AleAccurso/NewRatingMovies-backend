@@ -47,7 +47,7 @@ const getMovies = async (req, res, next) => {
         if (req && req.query && req.query.page) {
             const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
             if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-                res.status(400).json({ message: parseResult.error });
+                throw new httpException_1.default(httpCode_1.HttpCode.BAD_REQUEST, parseResult.error);
             }
             else {
                 pageInt = parseResult.parsedInt;
@@ -57,7 +57,7 @@ const getMovies = async (req, res, next) => {
         if (req && req.query && req.query.size) {
             const parseResult = (0, parseToInt_1.parseToInt)(req.query.size);
             if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
-                res.status(400).json({ message: parseResult.error });
+                throw new httpException_1.default(httpCode_1.HttpCode.BAD_REQUEST, parseResult.error);
             }
             else {
                 sizeInt = parseResult.parsedInt;
@@ -71,7 +71,7 @@ const getMovies = async (req, res, next) => {
         if (req && req.query && req.query.data) {
             const parseData = (0, parseToRequestType_1.ToRequestType)(req.query.data);
             if (parseData === requestType_1.RequestTypeEnum.UNKNOWN) {
-                res.status(400).json({ message: constants_1.msg.BAD_PARAMS + req.query.data });
+                throw new httpException_1.default(httpCode_1.HttpCode.BAD_REQUEST, constants_1.msg.BAD_PARAMS + req.query.data);
             }
             else {
                 requestType = parseData;
