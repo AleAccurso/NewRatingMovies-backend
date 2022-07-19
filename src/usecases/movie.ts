@@ -4,11 +4,11 @@ import HttpException from '@exceptions/httpException';
 import * as MovieRepository from '@repositories/movies';
 import MoviePagingDTO from '@dtos/moviePagingDTO';
 
-export const getMovies = (
+export const getMovies = async(
     page: number,
     size: number,
     data: RequestTypeEnum,
-): MoviePagingDTO => {
+): Promise<MoviePagingDTO> => {
     try {
         let moviePagingDTO = {
             page: page,
@@ -16,14 +16,14 @@ export const getMovies = (
             requestType: data,
         } as MoviePagingDTO;
 
-        const count = MovieRepository.CountMovies();
+        const count = await MovieRepository.CountMovies();
 
         moviePagingDTO.nbResults = count;
         moviePagingDTO.nbPages = Math.ceil(count / size);
 
         switch (data) {
             case RequestTypeEnum.FULL:
-                const moviesFull = MovieRepository.GetMoviesFull(
+                const moviesFull = await MovieRepository.GetMoviesFull(
                     page,
                     size,
                 );
@@ -32,7 +32,7 @@ export const getMovies = (
                 }
                 break;
             case RequestTypeEnum.ADMIN:
-                const moviesAdmin = MovieRepository.GetMoviesAdmin(
+                const moviesAdmin = await MovieRepository.GetMoviesAdmin(
                     page,
                     size,
                 );
@@ -41,7 +41,7 @@ export const getMovies = (
                 }
                 break;
             case RequestTypeEnum.MINIMUM:
-                const moviesMinimum = MovieRepository.GetMoviesMinimum(
+                const moviesMinimum = await MovieRepository.GetMoviesMinimum(
                     page,
                     size,
                 );

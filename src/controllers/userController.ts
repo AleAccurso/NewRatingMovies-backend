@@ -1,6 +1,6 @@
 import util from 'util';
 import { RequestHandler } from 'express';
-import { CallbackError, Schema } from 'mongoose';
+import { CallbackError } from 'mongoose';
 import { ObjectId } from 'mongodb';
 
 import { User } from '@schema/user';
@@ -106,8 +106,8 @@ export const updateUserById: RequestHandler = async (req, res, next) => {
 
     let userId = {} as ObjectId
     
-    if (req && req.query && req.query.id) {
-        const parseResult = parseToMongoId(req.query.id as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
@@ -163,8 +163,8 @@ export const updateUserById: RequestHandler = async (req, res, next) => {
 export const deleteUserById: RequestHandler = async (req, res, next) => {
     let userId = {} as ObjectId
     
-    if (req && req.query && req.query.id) {
-        const parseResult = parseToMongoId(req.query.id as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
@@ -205,8 +205,8 @@ export const deleteUserById: RequestHandler = async (req, res, next) => {
 export const updateUserRate: RequestHandler = async (req, res, next) => {
     let userId = {} as ObjectId
     
-    if (req && req.query && req.query.id) {
-        const parseResult = parseToMongoId(req.query.id as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
@@ -288,8 +288,8 @@ export const getUserFavorites: RequestHandler = async (req, res, next) => {
     
     let userId = {} as ObjectId
     
-    if (req && req.query && req.query.id) {
-        const parseResult = parseToMongoId(req.query.id as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
@@ -363,8 +363,8 @@ export const getUserFavorites: RequestHandler = async (req, res, next) => {
 export const updateUserFavorite: RequestHandler = async (req, res, next) => {
     let userId = {} as ObjectId
     
-    if (req && req.query && req.query.id) {
-        const parseResult = parseToMongoId(req.query.id as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });

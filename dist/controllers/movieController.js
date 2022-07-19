@@ -41,7 +41,7 @@ const parseToRequestType_1 = require("@utils/parseToRequestType");
 const parseToInt_1 = require("@utils/parseToInt");
 const parseToMongoId_1 = require("@utils/parseToMongoId");
 //get movies
-const getMovies = (req, res, next) => {
+const getMovies = async (req, res, next) => {
     try {
         let pageInt = -1;
         if (req && req.query && req.query.page) {
@@ -77,17 +77,8 @@ const getMovies = (req, res, next) => {
                 requestType = parseData;
             }
         }
-        const movies = MovieUseCase.getMovies(pageInt, sizeInt, requestType);
-        if (typeof movies != 'undefined') {
-            res.status(httpCode_1.HttpCode.OK).json(movies);
-        }
-        else {
-            res.status(httpCode_1.HttpCode.OK).json({
-                page: pageInt,
-                size: sizeInt,
-                requestType: requestType
-            });
-        }
+        const movies = await MovieUseCase.getMovies(pageInt, sizeInt, requestType);
+        res.status(httpCode_1.HttpCode.OK).json(movies);
     }
     catch (error) {
         (0, error_1.default)(error, req, res, next);
@@ -110,8 +101,8 @@ const addMovie = (req, res, next) => {
 exports.addMovie = addMovie;
 //Get movie by its id
 const getMovieById = (req, res, next) => {
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.page);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (!parseResult.parsedId && typeof parseResult.error != 'undefined') {
             throw new httpException_1.default(httpCode_1.HttpCode.BAD_REQUEST, parseResult.error);
         }
@@ -136,8 +127,8 @@ exports.getMovieById = getMovieById;
 //Update a movie
 const updateMovieById = (req, res, next) => {
     let movieId = {};
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }
@@ -161,8 +152,8 @@ exports.updateMovieById = updateMovieById;
 //Delete movie from DB
 const deleteMovieById = (req, res, next) => {
     let movieId = {};
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }

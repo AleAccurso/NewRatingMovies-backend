@@ -93,8 +93,8 @@ const updateUserById = async (req, res, next) => {
     let fileToUpload = req._file;
     let body = req.body;
     let userId = {};
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }
@@ -142,8 +142,8 @@ exports.updateUserById = updateUserById;
 //Delete a user
 const deleteUserById = async (req, res, next) => {
     let userId = {};
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }
@@ -181,8 +181,8 @@ exports.deleteUserById = deleteUserById;
 // Add, modify & remove a rate
 const updateUserRate = async (req, res, next) => {
     let userId = {};
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }
@@ -251,8 +251,8 @@ exports.updateUserRate = updateUserRate;
 // Get info of favorite movies
 const getUserFavorites = async (req, res, next) => {
     let userId = {};
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }
@@ -311,8 +311,8 @@ exports.getUserFavorites = getUserFavorites;
 //Add & remove a favorite
 const updateUserFavorite = async (req, res, next) => {
     let userId = {};
-    if (req && req.query && req.query.id) {
-        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+    if (req && req.params && req.params.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.params.id);
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
         }

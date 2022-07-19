@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 
-export const httpHeaders: RequestHandler = async (req, res, next) => {
+export const httpHeaders: RequestHandler = (req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
         "Access-Control-Allow-Methods",

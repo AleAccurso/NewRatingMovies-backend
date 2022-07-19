@@ -12,7 +12,6 @@ import IUser from '@models/user';
 import { RequestTypeEnum } from '@enums/requestType';
 
 import UserReqUpdateDTO from '@dtos/userReqUpdateDTO';
-import MoviePagingDTO from '@dtos/moviePagingDTO';
 
 import { Movie } from '@schema/movie';
 import { User } from '@schema/user';
@@ -27,7 +26,7 @@ import { parseToMongoId } from '@utils/parseToMongoId';
 import { ObjectId } from 'mongodb';
 
 //get movies
-export const getMovies: RequestHandler = (req, res, next): MoviePagingDTO => {
+export const getMovies: RequestHandler = async (req, res, next) => {
     try {
         let pageInt: number = -1;
     
@@ -70,17 +69,10 @@ export const getMovies: RequestHandler = (req, res, next): MoviePagingDTO => {
             }
         }
         
-        const movies = MovieUseCase.getMovies(pageInt, sizeInt, requestType);
+        const movies = await MovieUseCase.getMovies(pageInt, sizeInt, requestType);
         
-        if (typeof movies != 'undefined') {
-            res.status(HttpCode.OK).json(movies);
-        } else {
-            res.status(HttpCode.OK).json({
-                page: pageInt,
-                size: sizeInt,
-                requestType: requestType
-            } as MoviePagingDTO);
-        }
+        res.status(HttpCode.OK).json(movies);
+
     } catch (error) {
         sendError(error as HttpException, req, res, next)
     }
@@ -104,9 +96,9 @@ export const addMovie: RequestHandler = (req, res, next) => {
 //Get movie by its id
 export const getMovieById: RequestHandler = (req, res, next) => {
 
-    if (req && req.query && req.query.id) {
+    if (req && req.params && req.params.id) {
 
-        const parseResult = parseToMongoId(req.query.page as string);
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (!parseResult.parsedId && typeof parseResult.error != 'undefined') {
             throw new HttpException(HttpCode.BAD_REQUEST, parseResult.error)
@@ -134,8 +126,8 @@ export const updateMovieById: RequestHandler = (req, res, next) => {
 
     let movieId = {} as ObjectId
     
-    if (req && req.query && req.query.id) {
-        const parseResult = parseToMongoId(req.query.id as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
@@ -165,8 +157,8 @@ export const updateMovieById: RequestHandler = (req, res, next) => {
 export const deleteMovieById: RequestHandler = (req, res, next) => {
     let movieId = {} as ObjectId
     
-    if (req && req.query && req.query.id) {
-        const parseResult = parseToMongoId(req.query.id as string);
+    if (req && req.params && req.params.id) {
+        const parseResult = parseToMongoId(req.params.id as string);
 
         if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
             res.status(400).json({ message: parseResult.error });
