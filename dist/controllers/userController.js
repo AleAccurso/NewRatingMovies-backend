@@ -5,11 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateUserFavorite = exports.getUserFavorites = exports.updateUserRate = exports.deleteUserById = exports.updateUserById = exports.getUserById = exports.getUsers = void 0;
 const util_1 = __importDefault(require("util"));
-const mongodb_1 = require("mongodb");
 const user_1 = require("@schema/user");
 const movie_1 = require("@schema/movie");
 const userPicController_1 = require("@controllers/userPicController");
 const constants_1 = require("@constants/constants");
+const parseToInt_1 = require("@utils/parseToInt");
+const parseToMongoId_1 = require("@utils/parseToMongoId");
 //Update user - To manage formData
 const Multer = require('multer');
 const upload = Multer({
@@ -19,12 +20,30 @@ const upload = Multer({
     },
 }).single('avatar');
 const getUsers = async (req, res, next) => {
-    const page = req === null || req === void 0 ? void 0 : req._page;
-    const size = req === null || req === void 0 ? void 0 : req._size;
-    if (typeof page != "undefined" && typeof size != "undefined") {
+    let pageInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            pageInt = parseResult.parsedInt;
+        }
+    }
+    let sizeInt = -1;
+    if (req && req.query && req.query.size) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.size);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            sizeInt = parseResult.parsedInt;
+        }
+    }
+    if (typeof pageInt != "undefined" && typeof sizeInt != "undefined") {
         const user = user_1.User.find()
-            .skip(page * size)
-            .limit(size)
+            .skip(pageInt * sizeInt)
+            .limit(sizeInt)
             .exec((err, users) => {
             if (err) {
                 res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
@@ -41,10 +60,19 @@ const getUsers = async (req, res, next) => {
 exports.getUsers = getUsers;
 //Get a user
 const getUserById = async (req, res, next) => {
-    const userId = req._userId;
+    let userId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            userId = parseResult.parsedId;
+        }
+    }
     let isAdmin = req._userAdmin;
-    if (isAdmin || userId == req._id) {
-        const user = user_1.User.findOne({ _id: req._id }, (err, user) => {
+    if (isAdmin || userId == req._userId) {
+        const user = user_1.User.findOne({ _id: userId }, (err, user) => {
             if (err) {
                 res.status(404).send({
                     message: constants_1.msg.RESOURCE_NOT_FOUND + 'user',
@@ -62,11 +90,20 @@ const getUserById = async (req, res, next) => {
 exports.getUserById = getUserById;
 //update a user
 const updateUserById = async (req, res, next) => {
-    let fileToUpload = req.file;
+    let fileToUpload = req._file;
     let body = req.body;
-    let userId = req._userId;
+    let userId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            userId = parseResult.parsedId;
+        }
+    }
     let isAdmin = req._userAdmin;
-    if (isAdmin || userId == req._id) {
+    if (isAdmin || userId == req._userId) {
         // Manage File in the update request
         if (fileToUpload) {
             // Remove old file
@@ -86,7 +123,7 @@ const updateUserById = async (req, res, next) => {
             }
         }
         // Manage text field of the update request
-        user_1.User.findOneAndUpdate({ _id: req.params.id }, {
+        user_1.User.findOneAndUpdate({ _id: userId }, {
             ...body,
         }, null, (err) => {
             if (err) {
@@ -104,10 +141,19 @@ const updateUserById = async (req, res, next) => {
 exports.updateUserById = updateUserById;
 //Delete a user
 const deleteUserById = async (req, res, next) => {
-    let userId = req._id;
+    let userId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            userId = parseResult.parsedId;
+        }
+    }
     let userRole = req._userAdmin;
-    if (userRole || userId == req._id) {
-        const user = user_1.User.findOne({ _id: req._id }, (err, user) => {
+    if (userRole || userId == req._userId) {
+        const user = user_1.User.findOne({ _id: userId }, (err, user) => {
             if (err) {
                 res.status(404).send({
                     message: constants_1.msg.RESOURCE_NOT_FOUND + 'user',
@@ -134,30 +180,60 @@ const deleteUserById = async (req, res, next) => {
 exports.deleteUserById = deleteUserById;
 // Add, modify & remove a rate
 const updateUserRate = async (req, res, next) => {
-    const user = user_1.User.findOne({ _id: req._id }, null, (err, user) => {
+    let userId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            userId = parseResult.parsedId;
+        }
+    }
+    let movieDbIdInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            movieDbIdInt = parseResult.parsedInt;
+        }
+    }
+    let rateInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            rateInt = parseResult.parsedInt;
+        }
+    }
+    const user = user_1.User.findOne({ _id: userId }, null, (err, user) => {
         if (err) {
             res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
         }
         else if (user) {
             let userChanged = false;
-            let index = user.myRates.findIndex((rate) => rate.movieDbId === req._movieDbId);
+            let index = user.myRates.findIndex((rate) => rate.movieDbId === movieDbIdInt);
             if (index > -1) {
-                if (req._rate == 0) {
+                if (rateInt == 0) {
                     user.myRates.splice(index, 1);
                     userChanged = true;
                 }
-                else if (req._movieDbId && req._rate) {
+                else if (movieDbIdInt && rateInt) {
                     user.myRates[index] = {
-                        movieDbId: req._movieDbId,
-                        rate: req._rate * 2,
+                        movieDbId: movieDbIdInt,
+                        rate: rateInt * 2,
                     };
                     userChanged = true;
                 }
             }
-            else if (req._movieDbId && req._rate && req._rate > 0) {
+            else if (movieDbIdInt && rateInt && rateInt > 0) {
                 user.myRates.push({
-                    movieDbId: req._movieDbId,
-                    rate: req._rate * 2,
+                    movieDbId: movieDbIdInt,
+                    rate: rateInt * 2,
                 });
                 userChanged = true;
             }
@@ -165,8 +241,8 @@ const updateUserRate = async (req, res, next) => {
                 user.save();
             }
             res.status(200).json({
-                movieDbId: req._movieDbId,
-                rate: (typeof req._rate != 'undefined' ? req._rate : 0) * 2,
+                movieDbId: movieDbIdInt,
+                rate: (typeof rateInt != 'undefined' ? rateInt : 0) * 2,
             });
         }
     });
@@ -174,9 +250,41 @@ const updateUserRate = async (req, res, next) => {
 exports.updateUserRate = updateUserRate;
 // Get info of favorite movies
 const getUserFavorites = async (req, res, next) => {
-    const page = req._page;
-    const size = req._size;
-    let user = await user_1.User.findOne({ _id: req._id }).exec();
+    let userId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            userId = parseResult.parsedId;
+        }
+    }
+    let pageInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            pageInt = parseResult.parsedInt;
+        }
+    }
+    let sizeInt = -1;
+    if (req && req.query && req.query.size) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.size);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            sizeInt = parseResult.parsedInt;
+        }
+    }
+    if (pageInt < 0 || sizeInt < 1) {
+        pageInt = 0;
+        sizeInt = 5;
+    }
+    let user = await user_1.User.findOne({ _id: userId }).exec();
     let movies = [];
     if (user) {
         await Promise.all(user.myFavorites.map(async (id) => {
@@ -188,13 +296,13 @@ const getUserFavorites = async (req, res, next) => {
         }));
     }
     let nbMovies = movies.length;
-    if (page && size) {
-        movies = movies.slice(page * size, size + page * size);
+    if (pageInt && sizeInt) {
+        movies = movies.slice(pageInt * sizeInt, sizeInt + pageInt * sizeInt);
     }
     const toReturn = {
         nbFavorites: nbMovies,
-        page: page,
-        perPage: size,
+        page: pageInt,
+        perPage: sizeInt,
         movies: movies,
     };
     res.status(200).json(toReturn);
@@ -202,22 +310,40 @@ const getUserFavorites = async (req, res, next) => {
 exports.getUserFavorites = getUserFavorites;
 //Add & remove a favorite
 const updateUserFavorite = async (req, res, next) => {
-    var _a;
-    const id = (_a = req === null || req === void 0 ? void 0 : req.params) === null || _a === void 0 ? void 0 : _a.id;
-    const user = user_1.User.findOne({ _id: new mongodb_1.ObjectId(id) }, (err, user) => {
+    let userId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            userId = parseResult.parsedId;
+        }
+    }
+    let movieDbIdInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            movieDbIdInt = parseResult.parsedInt;
+        }
+    }
+    const user = user_1.User.findOne({ _id: userId }, (err, user) => {
         if (err) {
             res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
         }
-        else if (user && req._movieDbId) {
-            let index = user.myFavorites.indexOf(req._movieDbId);
+        else if (user && movieDbIdInt) {
+            let index = user.myFavorites.indexOf(movieDbIdInt);
             if (index >= 0) {
                 user.myFavorites.splice(index, 1);
             }
             else {
-                user.myFavorites.push(req._movieDbId);
+                user.myFavorites.push(movieDbIdInt);
             }
             user.save();
-            res.status(200).json({ movieDbId: req._movieDbId });
+            res.status(200).json({ movieDbId: movieDbIdInt });
         }
     });
 };

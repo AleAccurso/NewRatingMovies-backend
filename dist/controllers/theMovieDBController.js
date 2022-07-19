@@ -7,6 +7,7 @@ exports.getInfoFromAPI = exports.getSearchResultsFromAPI = void 0;
 const axios_1 = __importDefault(require("axios"));
 const constants_1 = require("@constants/constants");
 const languages_1 = require("@enums/languages");
+const parseToInt_1 = require("@utils/parseToInt");
 //Get search result from api
 const getSearchResultsFromAPI = (req, res, next) => {
     let url = process.env.API_URL +
@@ -52,12 +53,21 @@ exports.getSearchResultsFromAPI = getSearchResultsFromAPI;
 // Here, the id is actually the id of the movie in the API
 // movieDbId in our DB
 const getInfoFromAPI = async (req, res, next) => {
-    const movieDbId = req._movieDbId;
+    let movieDbIdInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            movieDbIdInt = parseResult.parsedInt;
+        }
+    }
     let infoToReturn = {};
     const generalDetails = await axios_1.default
         .get(process.env.API_URL +
         '/movie/' +
-        movieDbId +
+        movieDbIdInt +
         '?api_key=' +
         process.env.API_TOKEN +
         '&append_to_response=credits&language=en')
@@ -161,7 +171,7 @@ const getInfoFromAPI = async (req, res, next) => {
         const trailers = await axios_1.default
             .get(process.env.API_URL +
             '/movie/' +
-            movieDbId +
+            movieDbIdInt +
             '/videos?api_key=' +
             process.env.API_TOKEN +
             '&language=' +

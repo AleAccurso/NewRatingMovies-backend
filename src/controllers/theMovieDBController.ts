@@ -6,6 +6,7 @@ import { Trailer } from '@interfaces/trailer';
 import { MovieInfoAPI } from '@interfaces/movieInfo';
 import { localMovieInfo } from '@models/movie';
 import { LanguagesEnum } from '@enums/languages';
+import { parseToInt } from '@utils/parseToInt';
 
 //Get search result from api
 export const getSearchResultsFromAPI: RequestHandler = (req, res, next) => {
@@ -56,14 +57,24 @@ export const getSearchResultsFromAPI: RequestHandler = (req, res, next) => {
 // Here, the id is actually the id of the movie in the API
 // movieDbId in our DB
 export const getInfoFromAPI: RequestHandler = async (req, res, next) => {
-    const movieDbId = req._movieDbId;
+    let movieDbIdInt: number = -1;
+    
+    if (req && req.query && req.query.page) {
+        const parseResult = parseToInt(req.query.page as string);
+
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        } else {
+            movieDbIdInt = parseResult.parsedInt;
+        }
+    }
     let infoToReturn = {} as IMovie;
 
     const generalDetails = await axios
         .get(
             process.env.API_URL +
                 '/movie/' +
-                movieDbId +
+                movieDbIdInt +
                 '?api_key=' +
                 process.env.API_TOKEN +
                 '&append_to_response=credits&language=en',
@@ -187,7 +198,7 @@ export const getInfoFromAPI: RequestHandler = async (req, res, next) => {
             .get(
                 process.env.API_URL +
                     '/movie/' +
-                    movieDbId +
+                    movieDbIdInt +
                     '/videos?api_key=' +
                     process.env.API_TOKEN +
                     '&language=' +

@@ -135,8 +135,18 @@ const getMovieById = (req, res, next) => {
 exports.getMovieById = getMovieById;
 //Update a movie
 const updateMovieById = (req, res, next) => {
+    let movieId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            movieId = parseResult.parsedId;
+        }
+    }
     const newData = req.body;
-    const movie = movie_1.Movie.findOneAndUpdate({ _id: req._id }, {
+    const movie = movie_1.Movie.findOneAndUpdate({ _id: movieId }, {
         ...newData,
     }, null, (err) => {
         if (err) {
@@ -150,7 +160,17 @@ const updateMovieById = (req, res, next) => {
 exports.updateMovieById = updateMovieById;
 //Delete movie from DB
 const deleteMovieById = (req, res, next) => {
-    const movies = movie_1.Movie.findOne({ _id: req._id }, (err, movie) => {
+    let movieId = {};
+    if (req && req.query && req.query.id) {
+        const parseResult = (0, parseToMongoId_1.parseToMongoId)(req.query.id);
+        if (parseResult.error || typeof parseResult.parsedId == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            movieId = parseResult.parsedId;
+        }
+    }
+    const movies = movie_1.Movie.findOne({ _id: movieId }, (err, movie) => {
         if (err) {
             res.status(404).send({
                 message: constants_1.msg.RESOURCE_NOT_FOUND + 'movie',
@@ -176,7 +196,7 @@ const deleteMovieById = (req, res, next) => {
                 }
             });
             // Remove movie from DB
-            movie_1.Movie.deleteOne({ id: req._id }, (err) => {
+            movie_1.Movie.deleteOne({ id: movieId }, (err) => {
                 if (err) {
                     res.status(500).send({ message: constants_1.msg.SERVER_ERROR });
                 }
@@ -225,7 +245,17 @@ const updateMetaData = (req, res, next) => {
 exports.updateMetaData = updateMetaData;
 // Checks if a movie with the concerned movieDBId is in DB
 const isInDB = (req, res, next) => {
-    const movies = movie_1.Movie.findOne({ movieDbId: req._movieDbId }, (err, movie) => {
+    let movieDBInt = -1;
+    if (req && req.query && req.query.page) {
+        const parseResult = (0, parseToInt_1.parseToInt)(req.query.page);
+        if (parseResult.error || typeof parseResult.parsedInt == 'undefined') {
+            res.status(400).json({ message: parseResult.error });
+        }
+        else {
+            movieDBInt = parseResult.parsedInt;
+        }
+    }
+    const movies = movie_1.Movie.findOne({ movieDbId: movieDBInt }, (err, movie) => {
         if (err) {
             res.status(404).send({
                 message: constants_1.msg.RESOURCE_NOT_FOUND + 'movie',

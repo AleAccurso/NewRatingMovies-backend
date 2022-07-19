@@ -59,7 +59,7 @@ const login = async (req, res, next) => {
                 message: constants_1.authMsg.PASSWORD_MISSMATCH,
             });
         }
-        const token = (0, jsonwebtoken_1.sign)({ email: loadedUser.email }, process.env.JWT_SECRET, {
+        const token = (0, jsonwebtoken_1.sign)({ id: loadedUser._id, email: loadedUser.email }, process.env.JWT_SECRET, {
             expiresIn: '24h',
         });
         res.status(200).json({ token: token, language: loadedUser.language });

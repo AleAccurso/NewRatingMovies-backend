@@ -21,6 +21,7 @@ const isAdmin = async (req, res, next) => {
         if (typeof decoded != 'string') {
             let user = await user_1.User.findOne({ email: decoded.email });
             if (!user) {
+                req._userAdmin = false;
                 return res.status(401).json({
                     message: constants_1.msg.RESOURCE_NOT_FOUND + 'user',
                 });
@@ -28,6 +29,11 @@ const isAdmin = async (req, res, next) => {
             if (!user.isAdmin) {
                 throw new Error();
             }
+            req._userId = user._id;
+            req._userAdmin = true;
+        }
+        else {
+            req._userAdmin = false;
         }
         next();
     }
