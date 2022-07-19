@@ -13,20 +13,20 @@ const start = async (app) => {
     (0, mongoose_1.set)('debug', true);
     var logger = bunyan_1.default.createLogger({ name: "myapp" });
     mongoose_1.connection.once('open', function () {
-        logger.info('MongoDB event open');
+        logger.info('MongoDB open');
         // logger.debug('MongoDB connected [%s]', url);
-        mongoose_1.connection.on('connected', function () {
-            logger.info('MongoDB event connected');
-        });
-        mongoose_1.connection.on('disconnected', function () {
-            logger.warn('MongoDB event disconnected');
-        });
-        mongoose_1.connection.on('reconnected', function () {
-            logger.info('MongoDB event reconnected');
-        });
-        mongoose_1.connection.on('error', function (err) {
-            logger.error('MongoDB event error: ' + err);
-        });
+    });
+    mongoose_1.connection.on('connected', function () {
+        logger.info('MongoDB connected');
+    });
+    mongoose_1.connection.on('disconnected', function () {
+        logger.warn('MongoDB disconnected');
+    });
+    mongoose_1.connection.on('reconnected', function () {
+        logger.info('MongoDB reconnected');
+    });
+    mongoose_1.connection.on('error', function (err) {
+        logger.error('MongoDB error: ' + err);
     });
     const connectWithRetry = async () => {
         return await (0, mongoose_1.connect)(process.env.MONGOOSE_URI, {
